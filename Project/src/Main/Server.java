@@ -1,9 +1,12 @@
 package Main;
 
+import java.io.File;
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 public class Server {
@@ -11,9 +14,11 @@ public class Server {
 
     private ServerSocket serverSocket;
 
-    public Server() {
-
+    public Server()
+    {
+      //empty
     }
+
 
     public void start()
     {

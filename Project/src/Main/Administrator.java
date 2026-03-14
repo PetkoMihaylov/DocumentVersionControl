@@ -16,6 +16,6 @@ public class Administrator extends User
     @Override
     public String toString()
     {
-        return "Admin{} " + super.toString();
+        return "Administrator{} " + super.toString();
     }
 }
