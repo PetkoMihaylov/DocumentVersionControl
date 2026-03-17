@@ -11,7 +11,7 @@ import java.util.Scanner;
 
 public class Server {
 
-
+    private static final String USERS_FILENAME = "users.bin";
     private ServerSocket serverSocket;
 
     public Server()
@@ -19,6 +19,15 @@ public class Server {
       //empty
     }
 
+    public void initAdmins()
+    {
+        if (new File(USERS_FILENAME).exists())
+            return;
+        List<User> users = new ArrayList<>();
+        users.add(new Administrator("admin", "12345"));
+        UserMenu userMenu = new UserMenu();
+        userMenu.saveUsers(users);
+    }
 
     public void start()
     {
@@ -45,7 +54,8 @@ public class Server {
                     {
                         sc = new Scanner(client.getInputStream());
                         out = new PrintStream(client.getOutputStream());
-                        //userMenu(sc, out);
+                        UserMenu userMenu = new UserMenu();
+                        userMenu.startMenu(sc, out);
                     }
                     catch (IOException e)
                     {
@@ -69,7 +79,7 @@ public class Server {
         }
 
 
-        // For offline testing
+        // For offline testing old
         //userMenu(new Scanner(System.in), System.out);
     }
 

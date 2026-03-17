@@ -9,25 +9,24 @@ import java.util.Scanner;
 public class UserMenu {
 
     private static final String USERS_FILENAME = "users.bin";
-
+    private enum adminActions {
+            CREATEUSER,
+            CHANGEROLE,
+            EDITCONFIGURATION
+    }
 
     private final Object usersLock;
 
     public UserMenu()
     {
-        initAdmins();
         usersLock = new Object();
     }
 
-    public void initAdmins()
-    {
-        if (new File(USERS_FILENAME).exists())
-            return;
-        List<User> users = new ArrayList<>();
-        users.add(new Administrator("admin", "12345"));
-        saveUsers(users);
-    }
 
+
+    public void startMenu(Scanner sc, PrintStream out) {
+        showUserMenu(sc, out);
+    }
 
     private void showUserMenu(Scanner sc, PrintStream out){
         while (true)
@@ -108,29 +107,28 @@ public class UserMenu {
     private void adminMenu(Scanner sc, PrintStream out, Administrator admin)
     {
         out.println("Logged in as admin.");
+        out.println("Choose what action you want to take: CREATEUSER | CHANGEROLE | EDITCONFIGURATION");
 
-        out.println("Enter user type to create: (ADMIN | STUDENT | TEACHER");
-        try
-        {
-            UserType userType = UserType.valueOf(sc.nextLine().toUpperCase());
 
-            out.println("Enter username:");
-            String userName = sc.nextLine();
+        if(sc.nextLine().equalsIgnoreCase("CREATEUSER")) {
+            out.println("Enter user type to create: (ADMIN | STUDENT | TEACHER");
+            try {
+                UserType userType = UserType.valueOf(sc.nextLine().toUpperCase());
 
-            out.println("Enter password:");
-            String password = sc.nextLine();
+                out.println("Enter username:");
+                String userName = sc.nextLine();
 
-            registerUser(userName, password, userType);
+                out.println("Enter password:");
+                String password = sc.nextLine();
 
-            out.println("Success.");
-        }
-        catch (IllegalArgumentException e)
-        {
-            out.println("Error: Invalid user type.");
-        }
-        catch (CredentialsException e)
-        {
-            out.println(e.getMessage());
+                registerUser(userName, password, userType);
+
+                out.println("Success.");
+            } catch (IllegalArgumentException e) {
+                out.println("Error: Invalid user type.");
+            } catch (CredentialsException e) {
+                out.println(e.getMessage());
+            }
         }
     }
 
