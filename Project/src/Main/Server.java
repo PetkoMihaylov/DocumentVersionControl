@@ -11,12 +11,16 @@ import java.util.Scanner;
 
 public class Server {
 
-
+    private UserManager userManager;
+    private UserMenu userMenu;
     private ServerSocket serverSocket;
+
+
 
     public Server()
     {
-        UserMenu userMenu = new UserMenu();
+        userManager = new UserManager();
+        userMenu = new UserMenu(userManager);
     }
 
 
@@ -45,7 +49,8 @@ public class Server {
                     {
                         sc = new Scanner(client.getInputStream());
                         out = new PrintStream(client.getOutputStream());
-                        //showUserMenu(sc, out);
+                        //UserMenu userMenu = new UserMenu();
+                        userMenu.startMenu(sc, out);
                     }
                     catch (IOException e)
                     {
