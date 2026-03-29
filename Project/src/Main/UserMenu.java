@@ -89,7 +89,7 @@ public class UserMenu {
 
 
         if(sc.nextLine().equalsIgnoreCase("CREATEUSER")) {
-            out.println("Enter user type to create: (ADMIN | STUDENT | TEACHER");
+            out.println("Enter user type to create: (ADMINISTRATOR | AUTHOR | REVIEWER | READER) ;");
             try {
                 UserType userType = UserType.valueOf(sc.nextLine().toUpperCase());
 
