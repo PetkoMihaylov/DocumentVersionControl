@@ -9,19 +9,28 @@ import java.util.Scanner;
 public class UserMenu {
 
     private static final String USERS_FILENAME = "users.bin";
+
     private enum adminActions {
             CREATEUSER,
             CHANGEROLE,
             EDITCONFIGURATION
     }
 
-    private final Object usersLock;
+    private final Object usersLock = new Object();
 
     public UserMenu()
     {
-        usersLock = new Object();
+        initAdmins();
     }
 
+    public void initAdmins()
+    {
+        if (new File(USERS_FILENAME).exists())
+            return;
+        List<User> users = new ArrayList<>();
+        users.add(new Administrator("admin", "12345"));
+        saveUsers(users);
+    }
 
 
     public void startMenu(Scanner sc, PrintStream out) {
