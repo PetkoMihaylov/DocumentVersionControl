@@ -41,30 +41,28 @@ public class UserManager {
 
 
     public static User createUser(String userName, String password, UserType userType) throws CredentialsException {
+        if (password.length() < 5) {
+            throw new CredentialsException("Error: Password must be at least 5 characters");
+        }
         switch (userType) {
+
             case ADMINISTRATOR:
             {
-                //how to not be repetitive with the ifs when static doesn't work outside of this subclass?
-                if (password.length() < 5)
-                    throw new CredentialsException("Error: Password must be at least 5 characters");
+//                //how to not be repetitive with the ifs when static doesn't work outside of this subclass?
+//                if (password.length() < 5)
+//                    throw new CredentialsException("Error: Password must be at least 5 characters");
                 return new Administrator(userName, password);
             }
             case AUTHOR:
             {
-                if (password.length() < 5)
-                    throw new CredentialsException("Error: Password must be at least 5 characters");
                 return new Author(userName, password);
             }
             case REVIEWER:
             {
-                if (password.length() < 5)
-                    throw new CredentialsException("Error: Password must be at least 5 characters");
                 return new Reviewer(userName, password);
             }
             case READER:
             {
-                if (password.length() < 5)
-                    throw new CredentialsException("Error: Password must be at least 5 characters");
                 return new Reader(userName, password);
             }
 
@@ -111,11 +109,9 @@ public class UserManager {
                             " Serializable versions are not supported." +
                             " Recreate the users file.", e);
                 } catch (IncompatibleUserDataException ex) {
-                    throw new RuntimeException(ex);
+                    logger.log(Level.SEVERE, "Error occurred", e);
                 }
             }
-
-            logger.log(Level.SEVERE, "Error occurred", e);
         }
         catch (ClassNotFoundException e)
         {

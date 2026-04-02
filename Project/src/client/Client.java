@@ -1,56 +1,33 @@
 package client;
 
+import manager.UserManager;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Scanner;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class Client {
-    public static void main(String[] args)
-    {
-        Socket server = null;
-        Scanner console = null;
-        Scanner sc = null;
 
-        try
-        {
-            server = new Socket("localhost", 8080);
+    private static final Logger logger = Logger.getLogger(Client.class.getName());
 
-            console = new Scanner(System.in);
+    public static void main(String[] args) {
 
-            sc = new Scanner(server.getInputStream());
-            PrintStream out = new PrintStream(server.getOutputStream());
+        try (Socket server = new Socket("localhost", 8080);
+            Scanner console = new Scanner(System.in);
+            Scanner sc = new Scanner(server.getInputStream())) {
+                PrintStream out = new PrintStream(server.getOutputStream());
 
-            userMenu(console, sc, out);
-        }
-        catch (IOException e)
-        {
-            e.printStackTrace();
-        }
-        finally
-        {
-            if (server != null)
-            {
-                try
-                {
-                    server.close();
-                }
-                catch (IOException e)
-                {
-                    e.printStackTrace();
-                }
+                userMenu(console, sc, out);
+            } catch (IOException e) {
+                logger.log(Level.SEVERE, "Error occurred", e);
             }
-            if (console != null)
-                console.close();
-            if (sc != null)
-                sc.close();
-        }
     }
 
-    private static void userMenu(Scanner console, Scanner sc, PrintStream out)
-    {
-        while (true)
-        {
+    private static void userMenu(Scanner console, Scanner sc, PrintStream out) {
+        while (true) {
             // Login message
             System.out.println(sc.nextLine());
 
@@ -59,9 +36,9 @@ public class Client {
 
             String next = sc.nextLine();
             System.out.println(next);
-            if (next.equals("Goodbye."))
+            if (next.equals("Goodbye.")) {
                 return;
-
+            }
             // Enter username
             out.println(console.nextLine());
 
@@ -72,10 +49,12 @@ public class Client {
             // Login type
             next = sc.nextLine();
             System.out.println(next);
-            if (next.startsWith("Error"))
+            if (next.startsWith("Error")) {
                 continue;
-            if (next.equals("Logged in as admin."))
+            }
+            if (next.equals("Logged in as admin.")) {
                 adminMenu(console, sc, out);
+            }
             /*if (next.equals("Logged in as author."))
                 authorMenu(console, sc, out);
             if (next.equals("Logged in as reviewer."))
