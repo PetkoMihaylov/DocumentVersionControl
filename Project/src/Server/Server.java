@@ -1,4 +1,4 @@
-package Server;
+package server;
 
 import manager.UserManager;
 import menu.UserMenu;
@@ -28,23 +28,19 @@ public class Server {
 
 
     public void start() {
-            startServerSocket();
-            startClientThread();
 
+        startServerSocket();
+        startClientThread();
 
-        // For offline testing
-        //userMenu(new Scanner(System.in), System.out);
     }
 
-
-    private ServerSocket startServerSocket(){
+    private void startServerSocket() {
         System.out.println("The server is listening.");
         try {
             serverSocket = new ServerSocket(8080);
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error occurred", e);
         }
-        return serverSocket;
     }
 
     public void startClientThread() {
@@ -52,13 +48,8 @@ public class Server {
             try {
                 Socket client = serverSocket.accept();
                 System.out.println("Accepted client.");
-                Scanner sc = null;
-                PrintStream out = null;
 
-                Thread clientThread = new Thread(() -> {
-                    startMenu(sc, out, client);
-                });
-
+                Thread clientThread = new Thread(() -> handleClient(client));
                 clientThread.start();
 
             } catch (IOException e) {
@@ -67,20 +58,16 @@ public class Server {
         }
     }
 
-
-    private void startMenu(Scanner sc, PrintStream out, Socket client) {
-        try {
-            sc = new Scanner(client.getInputStream());
-            out = new PrintStream(client.getOutputStream());
-            //UserMenu userMenu = new UserMenu();
+    private void handleClient(Socket client) {
+        try (
+                Socket c = client;
+                Scanner sc = new Scanner(c.getInputStream());
+                PrintStream out = new PrintStream(c.getOutputStream())
+        ) {
             userMenu.startMenu(sc, out);
+
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error occurred", e);
-        } finally {
-            if (sc != null)
-                sc.close();
-            if (out != null)
-                out.close();
         }
     }
 }

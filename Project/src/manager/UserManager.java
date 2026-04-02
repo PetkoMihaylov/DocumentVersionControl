@@ -2,6 +2,7 @@ package manager;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 import customExceptions.CredentialsException;
+import customExceptions.IncompatibleUserDataException;
 import model.*;
 import model.Reader;
 
@@ -105,9 +106,13 @@ public class UserManager {
             if (e instanceof InvalidClassException)
             {
                 //see if it is possible to happen when saving?
-                throw new RuntimeException("One or more of the User subclasses has likely changed." +
-                        " Serializable versions are not supported." +
-                        " Recreate the users file.", e);
+                try {
+                    throw new IncompatibleUserDataException("One or more of the User subclasses has likely changed." +
+                            " Serializable versions are not supported." +
+                            " Recreate the users file.", e);
+                } catch (IncompatibleUserDataException ex) {
+                    throw new RuntimeException(ex);
+                }
             }
 
             logger.log(Level.SEVERE, "Error occurred", e);
@@ -115,7 +120,7 @@ public class UserManager {
         catch (ClassNotFoundException e)
         {
             // Should never happen
-            throw new RuntimeException(e);
+            throw new IllegalStateException(e);
         }
 
         return null;

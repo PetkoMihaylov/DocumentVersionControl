@@ -1,6 +1,6 @@
 package main;
 
-import Server.Server;
+import server.Server;
 
 public class ServerMain
 {

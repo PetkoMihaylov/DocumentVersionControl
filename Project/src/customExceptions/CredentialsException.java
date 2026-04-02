@@ -7,3 +7,4 @@ public class CredentialsException extends Exception
         super(msg);
     }
 }
+
