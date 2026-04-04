@@ -1,11 +1,12 @@
 package main;
 
 import server.Server;
+import document.service.DocumentCreator;
 
-public class ServerMain
-{
-    public static void main(String[] args)
-    {
+public class ServerMain {
+    public static void main(String[] args) {
+        DocumentCreator documentCreator = new DocumentCreator();
+        documentCreator.createNewDocument("for you", 2);
         Server server = new Server();
         server.start();
     }

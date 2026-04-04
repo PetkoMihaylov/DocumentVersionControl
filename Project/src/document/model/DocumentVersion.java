@@ -5,14 +5,14 @@ public class DocumentVersion {
 
 
 
-    private final String authorId;
+    private final int authorId;
     private final int versionNumber;
     private final LocalDateTime createdAt;
     private final String content;
     private DocumentVersionStatus status;
 
 
-    public DocumentVersion(int versionNumber, String content, String authorId) {
+    public DocumentVersion(int versionNumber, String content, int authorId) {
         this.authorId = authorId;
         this.versionNumber = versionNumber;
         this.createdAt = LocalDateTime.now(); //now for when initialized?
@@ -26,7 +26,7 @@ public class DocumentVersion {
     public String getContent() {
         return content;
     }
-    public String getAuthorId() {
+    public int getAuthorId() {
         return authorId;
     }
     public LocalDateTime getCreatedAt() {

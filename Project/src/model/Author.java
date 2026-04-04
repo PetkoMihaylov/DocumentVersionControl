@@ -8,8 +8,7 @@ public class Author extends User
     }
 
     @Override
-    public UserType getUserType()
-    {
+    public UserType getUserType() {
         return UserType.AUTHOR;
     }
 

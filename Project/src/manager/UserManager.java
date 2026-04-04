@@ -30,7 +30,7 @@ public class UserManager {
         initAdmins();
     }
 
-    public void initAdmins() {
+    private void initAdmins() {
         if (new File(USERS_FILENAME).exists())
             return;
         List<User> users = new ArrayList<>();
@@ -46,23 +46,17 @@ public class UserManager {
         }
         switch (userType) {
 
-            case ADMINISTRATOR:
-            {
+            case ADMINISTRATOR: {
 //                //how to not be repetitive with the ifs when static doesn't work outside of this subclass?
-//                if (password.length() < 5)
-//                    throw new CredentialsException("Error: Password must be at least 5 characters");
                 return new Administrator(userName, password);
             }
-            case AUTHOR:
-            {
+            case AUTHOR: {
                 return new Author(userName, password);
             }
-            case REVIEWER:
-            {
+            case REVIEWER: {
                 return new Reviewer(userName, password);
             }
-            case READER:
-            {
+            case READER: {
                 return new Reader(userName, password);
             }
 
@@ -88,21 +82,46 @@ public class UserManager {
         synchronized (usersLock) {
             List<User> users = loadUsers();
             users.add(user);
+            UserService userService = new UserService();
+            userService.addUser(user);
             saveUsers(users);
         }
     }
 
+    private List<User> checkIfObjectIsValid(Object obj){
+        List<?> tempList = (List<?>) obj;
+        if (obj instanceof List<?>) {
+
+            for (Object item : tempList) {
+                if (!(item instanceof User)) {
+                    throw new ClassCastException("List contains non-User elements");
+                }
+            }
+
+        }
+        return (List<User>) tempList;
+    }
 
     public List<User> loadUsers()
     {
-        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(USERS_FILENAME)))
-        {
-            return (List<User>) in.readObject();
+        try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(USERS_FILENAME))) {
+            Object obj = in.readObject();
+            List<User> userList = checkIfObjectIsValid(obj);
+
+            UserService userService = new UserService();
+            Map<Integer, User> userMap = new HashMap<>();
+            for (User user : userList) {
+                userMap.put(user.getUserId(), user);
+            }
+
+            userService.setUsers(userMap);
+
+            //userService.setUsers((Map<String, User>) in.readObject());
+            return userList;
+            //return (List<User>) in.readObject();
         }
-        catch (IOException e)
-        {
-            if (e instanceof InvalidClassException)
-            {
+        catch (IOException e) {
+            if (e instanceof InvalidClassException) {
                 //see if it is possible to happen when saving?
                 try {
                     throw new IncompatibleUserDataException("One or more of the User subclasses has likely changed." +
@@ -115,21 +134,18 @@ public class UserManager {
         }
         catch (ClassNotFoundException e)
         {
-            // Should never happen
+            // should never happen
             throw new IllegalStateException(e);
         }
 
         return null;
     }
 
-    public void saveUsers(List<User> users)
-    {
-        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(USERS_FILENAME)))
-        {
+    public void saveUsers(List<User> users) {
+        try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(USERS_FILENAME))) {
             out.writeObject(users);
         }
-        catch (IOException e)
-        {
+        catch (IOException e) {
             logger.log(Level.SEVERE, "Error occurred", e);
         }
     }

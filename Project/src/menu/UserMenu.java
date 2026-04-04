@@ -75,12 +75,15 @@ public class UserMenu {
     }
 
     private void readerMenu(Scanner sc, PrintStream out, Reader user) {
+        out.println("Logged in as reader!");
     }
 
     private void reviewerMenu(Scanner sc, PrintStream out, Reviewer user) {
+        out.println("Logged in as reviewer!");
     }
 
     private void authorMenu(Scanner sc, PrintStream out, Author user) {
+        out.println("Logged in as author!");
     }
 
 

@@ -22,14 +22,16 @@ public class DocumentService {
         version.setStatus(DocumentVersionStatus.REJECTED);
     }
 
-    public void activateVersion(Document doc, DocumentVersion version) {
+    public void activateVersion(Document document, DocumentVersion version) {
         if (version.getStatus() != DocumentVersionStatus.APPROVED) {
             throw new IllegalStateException("Only APPROVED versions can be activated.");
         }
 
         // deactivate current active version
-        DocumentVersion current = doc.getActiveVersion();
-        if (current != null) current.setStatus(DocumentVersionStatus.APPROVED);
+        DocumentVersion current = document.getActiveVersion();
+        if (current != null) {
+            current.setStatus(DocumentVersionStatus.APPROVED);
+        }
 
         // activate new version
         version.setStatus(DocumentVersionStatus.ACTIVE);
