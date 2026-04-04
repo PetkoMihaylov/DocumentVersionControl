@@ -1,6 +1,5 @@
 package client;
 
-import manager.UserManager;
 
 import java.io.IOException;
 import java.io.PrintStream;

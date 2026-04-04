@@ -1,15 +1,9 @@
-package document;
-
+package document.model;
 import java.time.LocalDateTime;
 
 public class DocumentVersion {
 
-    public enum DocumentVersionStatus {
-        DRAFT,
-        APPROVED,
-        REJECTED,
-        ACTIVE
-    }
+
 
     private final String authorId;
     private final int versionNumber;
@@ -25,6 +19,27 @@ public class DocumentVersion {
         this.content = content;
         //this.status = DocumentVersionStatus. //type;
     }
+
+    public int getVersionNumber() {
+        return versionNumber;
+    }
+    public String getContent() {
+        return content;
+    }
+    public String getAuthorId() {
+        return authorId;
+    }
+    public LocalDateTime getCreatedAt() {
+        return createdAt;
+    }
+    public DocumentVersionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(DocumentVersionStatus status) {
+        this.status = status;
+    }
+
 
 
 }
