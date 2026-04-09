@@ -6,7 +6,7 @@ import document.service.DocumentCreator;
 public class ServerMain {
     public static void main(String[] args) {
         DocumentCreator documentCreator = new DocumentCreator();
-        documentCreator.createNewDocument("for you", 2);
+        documentCreator.createNewDocuments("for you", 2);
         Server server = new Server();
         server.start();
     }

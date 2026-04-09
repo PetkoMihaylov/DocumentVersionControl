@@ -1,6 +1,7 @@
 package menu;
 
 import customExceptions.CredentialsException;
+import customExceptions.UserCreationException;
 import manager.UserManager;
 import model.*;
 import model.Reader;
@@ -112,8 +113,8 @@ public class UserMenu {
                 out.println("Success.");
             } catch (IllegalArgumentException e) {
                 out.println("Error: Invalid user type.");
-            } catch (CredentialsException e) {
-                out.println(e.getMessage());
+            } catch (UserCreationException e) {
+                throw new RuntimeException(e);
             }
         }
     }
