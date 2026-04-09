@@ -1,23 +1,27 @@
 package document.model;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class Document {
+
+    private static final AtomicInteger counter = new AtomicInteger(1);
     private final int documentId;
     private String title;
     private String description;
     private int authorId;
     private DocumentType documentType;
 
-    private final List<DocumentVersion> versions = new ArrayList<>();
+    private List<DocumentVersion> versions = new ArrayList<>();
 
-    public Document(int documentId, String title, String description, int authorId, DocumentType documentType) {
-        this.documentId = documentId;
+    public Document(String title, String description, int authorId, DocumentType documentType) {
+        this.documentId = counter.getAndIncrement();
         this.title = title;
         this.description = description;
         this.authorId = authorId;
         this.documentType = documentType;
     }
+
 
     public int getDocumentId() {
         return documentId;
