@@ -3,6 +3,8 @@ package model;
 import java.io.Serializable;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 
 public abstract class User implements Serializable
 {
@@ -11,11 +13,26 @@ public abstract class User implements Serializable
     private String userName;
     private String password;
 
+    private static Set<String> usernames = ConcurrentHashMap.newKeySet();
+
     public User(String userName, String password) {
         this.id = counter.getAndIncrement();
+        setUserName(userName);
+        setPassword(password);
+    }
+
+    private void setUserName(String userName) {
         this.userName = userName;
+        if(usernames.contains(userName)) {
+            System.out.print("");
+        }
+        usernames.add(userName);
+    }
+
+    private void setPassword(String password) {
         this.password = password;
     }
+
 
     public abstract UserType getUserType();
 
@@ -27,9 +44,6 @@ public abstract class User implements Serializable
         // a little bit confused on how this will work when I have to have an object and I can call getUserId();
     }*/
 
-    public void setUserName(String userName) {
-        this.userName = userName;
-    }
     public int getUserId() {
         return id;
     }
@@ -38,9 +52,6 @@ public abstract class User implements Serializable
         return password;
     }
 
-    public void setPassword(String password) {
-        this.password = password;
-    }
 
     @Override
     public String toString() {

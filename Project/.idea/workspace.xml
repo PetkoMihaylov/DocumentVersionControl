@@ -61,7 +61,7 @@
       <recent name="customExceptions" />
     </key>
   </component>
-  <component name="RunManager" selected="Application.Client">
+  <component name="RunManager" selected="Application.ServerMain">
     <configuration name="Client" type="Application" factoryName="Application" temporary="true" nameIsGenerated="true">
       <option name="MAIN_CLASS_NAME" value="client.Client" />
       <module name="DocumentVersionControl" />
@@ -90,8 +90,8 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Application.Client" />
         <item itemvalue="Application.ServerMain" />
+        <item itemvalue="Application.Client" />
       </list>
     </recent_temporary>
   </component>

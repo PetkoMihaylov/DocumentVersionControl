@@ -33,7 +33,7 @@ public class DocumentCreator {
         User reader1 = null;
         try {
             reviewer1 = userManager.registerUser("Reviewer1", "123", UserType.REVIEWER);
-            reviewer2 = userManager.registerUser("Rev   iewer2", "123", UserType.REVIEWER);
+            reviewer2 = userManager.registerUser("Reviewer2", "123", UserType.REVIEWER);
             author1 = userManager.registerUser("Author1", "123", UserType.AUTHOR);
             author2 = userManager.registerUser("Author2", "123", UserType.AUTHOR);
             reader1 = userManager.registerUser("Reader1", "123", UserType.READER);

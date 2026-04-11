@@ -1,9 +1,10 @@
 package document.model;
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class Document {
+public class Document implements Serializable {
 
     private static final AtomicInteger counter = new AtomicInteger(1);
     private final int documentId;

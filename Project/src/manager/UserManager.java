@@ -15,7 +15,7 @@ public class UserManager {
     private final static String regex1="\\d{9}"; //test regex
     private final static Pattern emailPattern = Pattern.compile("[a-z]+@tu-sofia.bg");
 
-    private static final String USERS_FILENAME = "users.bin";
+    private static final String USERS_FILENAME = "users.txt";
     private static final Logger logger = Logger.getLogger(UserManager.class.getName());
 
     private static final UserService userService = new UserService();
@@ -24,8 +24,24 @@ public class UserManager {
 
     private enum adminActions {
         CREATEUSER,
+        LISTDOCUMENTS,
         CHANGEROLE,
         EDITCONFIGURATION
+    }
+    private enum authorActions {
+        LISTDOCUMENTS,
+        VIEWDOCUMENT,
+        EDITDOCUMENT
+    }
+    private enum reviewerActions {
+        LISTDOCUMENTS,
+        VIEWDOCUMENT,
+        APPROVEDOCUMENT,
+        REJECTDOCUMENT
+    }
+    private enum readerActions {
+        LISTDOCUMENTS,
+        VIEWDOCUMENT
     }
 
 
@@ -59,7 +75,7 @@ public class UserManager {
 
 
     private static User createUser(String userName, String password, UserType userType) throws UserCreationException {
-        if (password.length() < 5) {
+        if (password.length() < 3) {
             throw new UserCreationException("Error: Password must be at least 5 characters");
         }
         switch (userType) {
@@ -161,5 +177,14 @@ public class UserManager {
     }*/
     public List<adminActions> getAdminActions() {
         return Arrays.asList(adminActions.values());
+    }
+    public List<authorActions> getAuthorActions() {
+        return Arrays.asList(authorActions.values());
+    }
+    public List<reviewerActions> getReviewerActions() {
+        return Arrays.asList(reviewerActions.values());
+    }
+    public List<readerActions> getReaderActions() {
+        return Arrays.asList(readerActions.values());
     }
 }

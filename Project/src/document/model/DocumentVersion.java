@@ -17,7 +17,7 @@ public class DocumentVersion {
         this.versionNumber = versionNumber;
         this.createdAt = LocalDateTime.now(); //now for when initialized?
         this.content = content;
-        //this.status = DocumentVersionStatus. //type;
+        this.status = DocumentVersionStatus.DRAFT;//type;
     }
 
     public int getVersionNumber() {

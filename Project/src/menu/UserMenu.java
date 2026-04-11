@@ -85,6 +85,7 @@ public class UserMenu {
 
     private void authorMenu(Scanner sc, PrintStream out, Author user) {
         out.println("Logged in as author!");
+        out.println("Choose what action you want to take: " + Arrays.toString(userManager.getAuthorActions().toArray()));
     }
 
 

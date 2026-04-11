@@ -5,8 +5,11 @@ import customExceptions.IncompatibleDocumentDataException;
 import customExceptions.IncompatibleUserDataException;
 import document.model.Document;
 import document.model.DocumentType;
+import model.Administrator;
+import model.User;
 
 import java.io.*;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -14,8 +17,25 @@ import java.util.logging.Logger;
 public class DocumentManager {
 
     private final Object documentsLock = new Object();
-    private static final String DOCUMENTS_FILENAME = "documents.bin";
+    private static final String DOCUMENTS_FILENAME = "documents.txt";
     private static final Logger logger = Logger.getLogger(DocumentManager.class.getName());
+
+    public DocumentManager() {
+       initDocuments();
+    }
+
+    private void initDocuments() {
+        if (new File(DOCUMENTS_FILENAME).exists()) {
+            return;
+        }
+        List<Document> documents = new ArrayList<>();
+        Document document = new Document("CExamples", "C code and examples.", 1, DocumentType.TXT);
+        documents.add(document);
+        saveDocuments(documents);
+        DocumentCreator documentCreator = new DocumentCreator();
+        documentCreator.createNewDocuments("Adding test docs. It doesn't matter what this is right now.", 1);
+    }
+
 
     public Document addDocument(String title, String description, int authorId, DocumentType documentType) throws DocumentCreationException {
         //add try and exception?
