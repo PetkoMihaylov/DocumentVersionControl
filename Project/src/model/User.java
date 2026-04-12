@@ -24,9 +24,11 @@ public abstract class User implements Serializable
     private void setUserName(String userName) {
         this.userName = userName;
         if(usernames.contains(userName)) {
-            System.out.print("");
+            throw new  IllegalArgumentException("User already exists!");
         }
-        usernames.add(userName);
+        else {
+            usernames.add(userName);
+        }
     }
 
     private void setPassword(String password) {
