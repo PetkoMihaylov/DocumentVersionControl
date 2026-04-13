@@ -1,12 +1,15 @@
 package client;
 
 
+import client.ui.LanternaEditor;
+
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
 
 public class Client {
 
@@ -54,6 +57,9 @@ public class Client {
             if (next.equals("Logged in as admin.")) {
                 adminMenu(console, sc, out);
             }
+            else if (next.equals("Logged in as author.")) {
+                authorMenu(console, sc, out);
+            }
             /*if (next.equals("Logged in as author."))
                 authorMenu(console, sc, out);
             if (next.equals("Logged in as reviewer."))
@@ -72,18 +78,47 @@ public class Client {
         // Username
         String next = sc.nextLine();
         System.out.println(next);
-        if (next.startsWith("Error"))
+        if (next.startsWith("Error")) {
             return;
+        }
         out.println(console.nextLine());
 
         // Password
         next = sc.nextLine();
         System.out.println(next);
-        if (next.startsWith("Error"))
+        if (next.startsWith("Error")) {
             return;
+        }
         out.println(console.nextLine());
 
         // result
         System.out.println(sc.nextLine());
+    }
+
+    private static void authorMenu(Scanner console, Scanner sc, PrintStream out) {
+        //DocumentService documentService = new DocumentService();
+//        LanternaEditor lanternaEditor = new LanternaEditor(documentService.getDocumentById(1).getLatestVersion().getContent());
+//        System.out.println(documentService.getDocumentById(1).getLatestVersion().getContent());
+
+        System.out.println(sc.nextLine());
+        out.println(console.nextLine());
+
+        // LISTDOCUMENTS
+        String next = sc.nextLine();
+        System.out.println(next);
+        if (next.startsWith("Error")) {
+            return;
+        }
+        out.println(console.nextLine());
+
+
+
+
+
+//        try {
+//            lanternaEditor.start();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
     }
 }
