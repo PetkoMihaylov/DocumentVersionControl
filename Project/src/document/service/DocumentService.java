@@ -23,7 +23,6 @@ public class DocumentService {
     }
     public void addVersionToDocument(int documentId, String content, int userId){
         Document document = documents.get(documentId);
-
         if (document != null) {
             document.createNewVersion(content, userId);
 

@@ -50,6 +50,7 @@ public class DocumentManager {
         synchronized (documentsLock) {
             List<Document> documents = loadDocuments();
             documents.add(document);
+            documentService.addDocument(document);
             //documentManager.addDocument(document); //for a local copy of all documents in a map with id? or just map
             saveDocuments(documents);
         }
