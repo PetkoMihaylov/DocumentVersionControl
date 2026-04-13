@@ -71,17 +71,20 @@ public class DocumentCreator {
 
         documentService.addVersionToDocument(document1.getDocumentId(), "JavaFunctions is the most important thing, this means you have to learn!", id3);
 
+        documentService.addVersionToDocument(document1.getDocumentId(),"JavaFunctions2", id2);
+
+
         Document document2 = documentManager.addDocument("JavaCourses", "Java coding and courses.", id3, DocumentType.XML);
 
         documentService.addVersionToDocument(document2.getDocumentId(),"JavaFunctions is the most important thing, this means you have to learn! I have added this.", id4);
 
-        documentService.addVersionToDocument(document1.getDocumentId(),"JavaFunctions2", id2);
+
 
 
 
 
         Document document3 = documentManager.addDocument("C# Courses", "c# coding and courses.", id4, DocumentType.DOCX);
-        documentService.addVersionToDocument(document2.getDocumentId(), "Here you can learn about C#, step-by-step,", id4);
+        documentService.addVersionToDocument(document3.getDocumentId(), "Here you can learn about C#, step-by-step,", id4); //changed from doc2 to 3
 
         List<DocumentVersion> doc1versions = document1.getAllVersions();
         for (DocumentVersion documentVersion : doc1versions) {

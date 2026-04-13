@@ -9,11 +9,10 @@ import model.Reader;
 
 import java.io.*;
 import java.util.*;
-import java.util.regex.Pattern;
 
 public class UserManager {
-    private final static String regex1="\\d{9}"; //test regex
-    private final static Pattern emailPattern = Pattern.compile("[a-z]+@tu-sofia.bg");
+    //private final static String regex1="\\d{9}"; //test regex
+    //private final static Pattern emailPattern = Pattern.compile("[a-z]+@tu-sofia.bg");
 
     private static final String USERS_FILENAME = "users.bin";
     private static final Logger logger = Logger.getLogger(UserManager.class.getName());
@@ -22,27 +21,6 @@ public class UserManager {
 
     private final Object usersLock = new Object();
 
-    private enum adminActions {
-        CREATEUSER,
-        LISTDOCUMENTS,
-        CHANGEROLE,
-        EDITCONFIGURATION
-    }
-    private enum authorActions {
-        LISTDOCUMENTS,
-        VIEWDOCUMENT,
-        EDITDOCUMENT
-    }
-    private enum reviewerActions {
-        LISTDOCUMENTS,
-        VIEWDOCUMENT,
-        APPROVEDOCUMENT,
-        REJECTDOCUMENT
-    }
-    private enum readerActions {
-        LISTDOCUMENTS,
-        VIEWDOCUMENT
-    }
 
 
     public UserManager() {
@@ -81,7 +59,6 @@ public class UserManager {
         switch (userType) {
 
             case ADMINISTRATOR: {
-//                //how to not be repetitive with the ifs when static doesn't work outside of this subclass?
                 return new Administrator(userName, password);
             }
             case AUTHOR: {
@@ -170,16 +147,16 @@ public class UserManager {
         }
     }
 
-    public List<adminActions> getAdminActions() {
-        return Arrays.asList(adminActions.values());
+    public List<AdminActions> getAdminActions() {
+        return Arrays.asList(AdminActions.values());
     }
-    public List<authorActions> getAuthorActions() {
-        return Arrays.asList(authorActions.values());
+    public List<AuthorActions> getAuthorActions() {
+        return Arrays.asList(AuthorActions.values());
     }
-    public List<reviewerActions> getReviewerActions() {
-        return Arrays.asList(reviewerActions.values());
+    public List<ReviewerActions> getReviewerActions() {
+        return Arrays.asList(ReviewerActions.values());
     }
-    public List<readerActions> getReaderActions() {
-        return Arrays.asList(readerActions.values());
+    public List<ReaderActions> getReaderActions() {
+        return Arrays.asList(ReaderActions.values());
     }
 }

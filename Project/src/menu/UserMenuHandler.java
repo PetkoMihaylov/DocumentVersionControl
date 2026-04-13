@@ -1,6 +1,5 @@
 package menu;
 
-import customExceptions.CredentialsException;
 import customExceptions.UserCreationException;
 import document.model.Document;
 import document.service.DocumentService;
@@ -11,13 +10,13 @@ import model.Reader;
 import java.io.*;
 import java.util.*;
 
-public class UserMenu {
+public class UserMenuHandler {
     private final UserManager userManager;
 
     private DocumentService documentService = new DocumentService();
 
 
-    public UserMenu(UserManager userManager)
+    public UserMenuHandler(UserManager userManager)
     {
         this.userManager = userManager;
     }
@@ -100,7 +99,7 @@ public class UserMenu {
 
 
 
-        if(sc.nextLine().equalsIgnoreCase("CREATEUSER")) {
+        if(sc.nextLine().equalsIgnoreCase("CREATE_USER")) {
             out.println("Enter user type to create: " + Arrays.toString(UserType.values()) + ";");
             try {
                 UserType userType = UserType.valueOf(sc.nextLine().toUpperCase());
@@ -126,7 +125,7 @@ public class UserMenu {
         out.println("Logged in as author!");
         out.println("Choose what action you want to take: " + Arrays.toString(userManager.getAuthorActions().toArray()));
 
-        if((sc.nextLine().equalsIgnoreCase("LISTDOCUMENTS")) || (sc.nextLine().equalsIgnoreCase("L"))) {
+        if(sc.nextLine().equalsIgnoreCase("L")) { //LIST_DOCUMENTS
             out.print("Choose which of the following documents you want to view!");
             try {
                 System.out.println(documentService.getDocuments());
@@ -144,6 +143,22 @@ public class UserMenu {
                 out.println("Error: Invalid user type.");
             }
         }
+    }
+
+    public static void sendCommand(PrintStream out, String command) {
+        out.println(command);
+        out.println("END");
+    }
+    public static String readResponse(Scanner sc) {
+
+        StringBuilder sb = new StringBuilder();
+        String line;
+
+        while (!(line = sc.nextLine()).equals("END")) {
+            sb.append(line).append("\n");
+        }
+
+        return sb.toString();
     }
 
 

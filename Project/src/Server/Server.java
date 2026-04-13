@@ -2,7 +2,7 @@ package server;
 
 import document.service.DocumentManager;
 import manager.UserManager;
-import menu.UserMenu;
+import menu.UserMenuHandler;
 
 import java.io.IOException;
 import java.io.PrintStream;
@@ -15,7 +15,7 @@ import java.util.logging.Logger;
 public class Server {
 
     private UserManager userManager;
-    private UserMenu userMenu;
+    private UserMenuHandler userMenuHandler;
     private DocumentManager documentManager;
     private ServerSocket serverSocket;
 
@@ -25,7 +25,7 @@ public class Server {
     public Server()
     {
         userManager = new UserManager();
-        userMenu = new UserMenu(userManager);
+        userMenuHandler = new UserMenuHandler(userManager);
         documentManager = new DocumentManager();
     }
 
@@ -67,7 +67,7 @@ public class Server {
                 Scanner sc = new Scanner(c.getInputStream());
                 PrintStream out = new PrintStream(c.getOutputStream())
         ) {
-            userMenu.startMenu(sc, out);
+            userMenuHandler.startMenu(sc, out);
 
         } catch (IOException e) {
             logger.log(Level.SEVERE, "Error occurred", e);
