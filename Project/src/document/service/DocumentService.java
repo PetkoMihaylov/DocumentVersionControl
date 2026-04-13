@@ -4,10 +4,7 @@ import document.model.Document;
 import document.model.DocumentType;
 import document.model.DocumentVersion;
 import document.model.DocumentVersionStatus;
-import model.Administrator;
-import model.Author;
-import model.Reader;
-import model.Reviewer;
+import model.*;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -20,70 +17,39 @@ import java.nio.file.Path;
 
 
 import java.io.File;
+import java.util.*;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
-import org.w3c.dom.Document;
 
 public class DocumentService {
 
-    public void approveVersion(DocumentVersion version, String reviewerId) {
-        if (version.getStatus() != DocumentVersionStatus.DRAFT) {
-            throw new IllegalStateException("Only DRAFT versions can be approved.");
-        }
+    public static Map<Integer, Document> documents = new HashMap<>();
 
-        version.setStatus(DocumentVersionStatus.APPROVED);
+    public Map<Integer, Document> getDocumentsMap() {
+        return documents;
+    }
+    public List<Document> getDocuments() {
+        if (documents.isEmpty()) {
+            DocumentManager documentManager = new DocumentManager();
+            System.out.println("It is -> " + documents);
+            documentManager.loadDocuments();
+            System.out.println("Now it is -> " + documents);
+        }
+        return new ArrayList<>(documents.values());
+    }
+    public void setDocuments(Map<Integer, Document> passedDocuments) {
+        documents =  passedDocuments;
+    }
+    public void addDocument(Document document) {
+        documents.put(document.getDocumentId(), document);
     }
 
-    public void rejectVersion(DocumentVersion version, String reviewerId) {
-        if (version.getStatus() != DocumentVersionStatus.DRAFT) {
-            throw new IllegalStateException("Only DRAFT versions can be rejected.");
-        }
-
-        version.setStatus(DocumentVersionStatus.REJECTED);
+    public void removeDocument(Document document) {
+        documents.remove(document.getDocumentId());
     }
 
-    public void activateVersion(Document document, DocumentVersion version) {
-        if (version.getStatus() != DocumentVersionStatus.APPROVED) {
-            throw new IllegalStateException("Only APPROVED versions can be activated.");
-        }
 
-        // deactivate current active version
-        DocumentVersion current = document.getActiveVersion();
-        if (current != null) {
-            current.setStatus(DocumentVersionStatus.APPROVED);
-        }
-
-        // activate new version
-        version.setStatus(DocumentVersionStatus.ACTIVE);
-    }
-
-    public void readDocument(Document document, String userId) throws ParserConfigurationException, IOException, SAXException {
-        DocumentType documentType = DocumentType.valueOf(document.getDocumentType());
-        switch (documentType) {
-
-            case TXT: {
-//                // how to not be repetitive with the ifs when static doesn't work outside of this subclass?
-            }
-            case JSON: {
-
-            }
-            case XML: {
-//                File file = new File("file.xml");
-//                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
-//                DocumentBuilder db = dbf.newDocumentBuilder();
-//                Document documentXML = db.parse(file);
-
-            }
-            case DOC: {
-
-            }
-
-//            default:
-//                return null;
-            case DOCX: {
-
-            }
-        }
-        //Files.readString(Path.of("file.txt"));
+    public Document getDocumentById(int id) {
+        return documents.get(id);
     }
 }

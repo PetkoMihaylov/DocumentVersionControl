@@ -15,7 +15,7 @@ public class UserManager {
     private final static String regex1="\\d{9}"; //test regex
     private final static Pattern emailPattern = Pattern.compile("[a-z]+@tu-sofia.bg");
 
-    private static final String USERS_FILENAME = "users.txt";
+    private static final String USERS_FILENAME = "users.bin";
     private static final Logger logger = Logger.getLogger(UserManager.class.getName());
 
     private static final UserService userService = new UserService();
@@ -170,11 +170,6 @@ public class UserManager {
         }
     }
 
-    /*private static boolean checkPassword(password)
-    {
-        if (password.length() < 5)
-            throw new CredentialsException("Error: Password must be at least 5 characters");
-    }*/
     public List<adminActions> getAdminActions() {
         return Arrays.asList(adminActions.values());
     }

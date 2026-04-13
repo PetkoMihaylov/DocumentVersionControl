@@ -5,20 +5,26 @@ import customExceptions.IncompatibleDocumentDataException;
 import customExceptions.IncompatibleUserDataException;
 import document.model.Document;
 import document.model.DocumentType;
+import document.model.DocumentVersion;
+import document.model.DocumentVersionStatus;
 import model.Administrator;
 import model.User;
+import org.xml.sax.SAXException;
 
+import javax.xml.parsers.ParserConfigurationException;
 import java.io.*;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 public class DocumentManager {
 
     private final Object documentsLock = new Object();
-    private static final String DOCUMENTS_FILENAME = "documents.txt";
+    private static final String DOCUMENTS_FILENAME = "documents.bin";
     private static final Logger logger = Logger.getLogger(DocumentManager.class.getName());
+
+    private static DocumentService documentService = new DocumentService();
+    //private List<Document> documents = new ArrayList<>();
 
     public DocumentManager() {
        initDocuments();
@@ -52,6 +58,7 @@ public class DocumentManager {
     private static Document createDocument(String title, String description, int authorId, DocumentType documentType) throws DocumentCreationException {
         //add checks for null etc.
         Document document = new Document(title, description, authorId, documentType);
+        documentService.addDocument(document);
         return document;
         /*switch (documentType) {
 
@@ -94,19 +101,23 @@ public class DocumentManager {
     }
 
 
-
-    private List<Document> loadDocuments() {
+    List<Document> loadDocuments() {
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(DOCUMENTS_FILENAME))) {
             Object obj = in.readObject();
             List<Document> documentsList = checkIfObjectIsValid(obj); //it is not needed, but it makes it more readable?
 
-//            Map<Integer, Document> documentMap = new HashMap<>();
-//            for (Document document : documentList) {
-//                documentMap.put(document.getDocumentId(), document);
-//            }
-//            documentService.setDocuments(documentMap);
+            System.out.println("\nI am passing through load documents!\n\n");
+            System.out.println(documentsList.getLast().getAllVersions());
+            System.out.println("\n\n");
 
-            //documentService.setDocuments((Map<String, Document>) in.readObject());
+            if(!documentsList.isEmpty()){
+                Map<Integer, Document> documentMap = new HashMap<>();
+                for (Document document : documentsList) {
+                    documentMap.put(document.getDocumentId(), document);
+                }
+
+                documentService.setDocuments(documentMap);
+            }
             return documentsList;
         }
         catch (IOException e) {
@@ -139,5 +150,64 @@ public class DocumentManager {
         }
     }
 
+    public void approveVersion(DocumentVersion version, String reviewerId) {
+        if (version.getStatus() != DocumentVersionStatus.DRAFT) {
+            throw new IllegalStateException("Only DRAFT versions can be approved.");
+        }
 
+        version.setStatus(DocumentVersionStatus.APPROVED);
+    }
+
+    public void rejectVersion(DocumentVersion version, String reviewerId) {
+        if (version.getStatus() != DocumentVersionStatus.DRAFT) {
+            throw new IllegalStateException("Only DRAFT versions can be rejected.");
+        }
+
+        version.setStatus(DocumentVersionStatus.REJECTED);
+    }
+
+    public void activateVersion(Document document, DocumentVersion version) {
+        if (version.getStatus() != DocumentVersionStatus.APPROVED) {
+            throw new IllegalStateException("Only APPROVED versions can be activated.");
+        }
+
+        // deactivate current active version
+        DocumentVersion current = document.getActiveVersion();
+        if (current != null) {
+            current.setStatus(DocumentVersionStatus.APPROVED);
+        }
+
+        // activate new version
+        version.setStatus(DocumentVersionStatus.ACTIVE);
+    }
+
+    public void readDocument(Document document, String userId) throws ParserConfigurationException, IOException, SAXException {
+        DocumentType documentType = DocumentType.valueOf(document.getDocumentType());
+        switch (documentType) {
+
+            case TXT: {
+//                // how to not be repetitive with the ifs when static doesn't work outside of this subclass?
+            }
+            case JSON: {
+
+            }
+            case XML: {
+//                File file = new File("file.xml");
+//                DocumentBuilderFactory dbf = DocumentBuilderFactory.newInstance();
+//                DocumentBuilder db = dbf.newDocumentBuilder();
+//                Document documentXML = db.parse(file);
+
+            }
+            case DOC: {
+
+            }
+
+//            default:
+//                return null;
+            case DOCX: {
+
+            }
+        }
+        //Files.readString(Path.of("file.txt"));
+    }
 }

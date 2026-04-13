@@ -2,6 +2,8 @@ package menu;
 
 import customExceptions.CredentialsException;
 import customExceptions.UserCreationException;
+import document.model.Document;
+import document.service.DocumentService;
 import manager.UserManager;
 import model.*;
 import model.Reader;
@@ -11,6 +13,9 @@ import java.util.*;
 
 public class UserMenu {
     private final UserManager userManager;
+
+    private DocumentService documentService = new DocumentService();
+
 
     public UserMenu(UserManager userManager)
     {
@@ -83,10 +88,7 @@ public class UserMenu {
         out.println("Logged in as reviewer!");
     }
 
-    private void authorMenu(Scanner sc, PrintStream out, Author user) {
-        out.println("Logged in as author!");
-        out.println("Choose what action you want to take: " + Arrays.toString(userManager.getAuthorActions().toArray()));
-    }
+
 
 
 
@@ -99,7 +101,7 @@ public class UserMenu {
 
 
         if(sc.nextLine().equalsIgnoreCase("CREATEUSER")) {
-            out.println("Enter user type to create: (ADMINISTRATOR | AUTHOR | REVIEWER | READER) ;");
+            out.println("Enter user type to create: " + Arrays.toString(UserType.values()) + ";");
             try {
                 UserType userType = UserType.valueOf(sc.nextLine().toUpperCase());
 
@@ -120,6 +122,29 @@ public class UserMenu {
         }
     }
 
+    private void authorMenu(Scanner sc, PrintStream out, Author author) {
+        out.println("Logged in as author!");
+        out.println("Choose what action you want to take: " + Arrays.toString(userManager.getAuthorActions().toArray()));
+
+        if((sc.nextLine().equalsIgnoreCase("LISTDOCUMENTS")) || (sc.nextLine().equalsIgnoreCase("L"))) {
+            out.print("Choose which of the following documents you want to view!");
+            try {
+                System.out.println(documentService.getDocuments());
+                List<Document> documentsList =  documentService.getDocuments();
+                //out.println(documentsList);
+                for(Document document : documentsList) {
+                    System.out.println("This doc: " + document.getDocumentId() + " with " + document.getTitle());
+                    System.out.println("Here are the versions -> " + document.getAllVersions());
+                    document.printDocumentData();
+                }
+
+
+                out.println("Success.");
+            } catch (IllegalArgumentException e) {
+                out.println("Error: Invalid user type.");
+            }
+        }
+    }
 
 
 }

@@ -48,6 +48,12 @@ public class DocumentCreator {
         int id4 = author2.getUserId();
         int id5 = reader1.getUserId();
 
+        System.out.println("New user created. " + id1);
+        System.out.println("New user created. " + id2);
+        System.out.println("New user created. " + id3);
+        System.out.println("New user created. " + id4);
+        System.out.println("New user created. " + id5);
+
         System.out.println("Creating docs...");
 
 
@@ -57,9 +63,10 @@ public class DocumentCreator {
         document1.createNewVersion("JavaFunctions is the most important thing, this means you have to learn!", id3);
         Document document2 = documentManager.addDocument("JavaCourses", "Java coding and courses.", id3, DocumentType.XML);
         document1.createNewVersion("JavaFunctions is the most important thing, this means you have to learn! I have added this.", id4);
+        document1.createNewVersion("JavaFunctions2", id2);
+
         Document document3 = documentManager.addDocument("C# Courses", "c# coding and courses.", id4, DocumentType.DOCX);
         document3.createNewVersion("Here you can learn about C#, step-by-step,", id4);
-        document1.createNewVersion("JavaFunctions2", id2);
 
         List<DocumentVersion> doc1versions = document1.getAllVersions();
         for (DocumentVersion documentVersion : doc1versions) {

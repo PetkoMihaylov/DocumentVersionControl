@@ -3,8 +3,6 @@ import java.time.LocalDateTime;
 
 public class DocumentVersion {
 
-
-
     private final int authorId;
     private final int versionNumber;
     private final LocalDateTime createdAt;
@@ -15,7 +13,7 @@ public class DocumentVersion {
     public DocumentVersion(int versionNumber, String content, int authorId) {
         this.authorId = authorId;
         this.versionNumber = versionNumber;
-        this.createdAt = LocalDateTime.now(); //now for when initialized?
+        this.createdAt = LocalDateTime.now(); //now for when it's initialized?
         this.content = content;
         this.status = DocumentVersionStatus.DRAFT;//type;
     }

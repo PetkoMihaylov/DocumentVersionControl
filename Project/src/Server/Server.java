@@ -1,5 +1,6 @@
 package server;
 
+import document.service.DocumentManager;
 import manager.UserManager;
 import menu.UserMenu;
 
@@ -15,6 +16,7 @@ public class Server {
 
     private UserManager userManager;
     private UserMenu userMenu;
+    private DocumentManager documentManager;
     private ServerSocket serverSocket;
 
     private static final Logger logger = Logger.getLogger(Server.class.getName());
@@ -24,6 +26,7 @@ public class Server {
     {
         userManager = new UserManager();
         userMenu = new UserMenu(userManager);
+        documentManager = new DocumentManager();
     }
 
 
@@ -53,7 +56,7 @@ public class Server {
                 clientThread.start();
 
             } catch (IOException e) {
-                logger.log(Level.SEVERE, "Error occurred", e);
+                logger.log(Level.SEVERE, "Error occurred on Client thread. Disconnected probably.", e);
             }
         }
     }
