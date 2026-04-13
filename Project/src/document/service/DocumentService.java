@@ -1,25 +1,9 @@
 package document.service;
 
 import document.model.Document;
-import document.model.DocumentType;
-import document.model.DocumentVersion;
-import document.model.DocumentVersionStatus;
-import model.*;
-import org.xml.sax.SAXException;
-
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 
 
-import java.io.File;
 import java.util.*;
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
 
 public class DocumentService {
 
@@ -37,6 +21,18 @@ public class DocumentService {
         }
         return new ArrayList<>(documents.values());
     }
+    public void addVersionToDocument(int documentId, String content, int userId){
+        Document document = documents.get(documentId);
+
+        if (document != null) {
+            document.createNewVersion(content, userId);
+
+            DocumentManager documentManager = new DocumentManager();
+            documentManager.saveDocuments(new ArrayList<>(documents.values()));
+        }
+    }
+
+
     public void setDocuments(Map<Integer, Document> passedDocuments) {
         documents =  passedDocuments;
     }

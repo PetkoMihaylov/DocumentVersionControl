@@ -37,6 +37,7 @@ public class DocumentManager {
         List<Document> documents = new ArrayList<>();
         Document document = new Document("CExamples", "C code and examples.", 1, DocumentType.TXT);
         documents.add(document);
+        documentService.addDocument(document);
         saveDocuments(documents);
         DocumentCreator documentCreator = new DocumentCreator();
         documentCreator.createNewDocuments("Adding test docs. It doesn't matter what this is right now.", 1);

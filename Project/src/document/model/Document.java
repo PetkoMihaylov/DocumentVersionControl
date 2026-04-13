@@ -1,4 +1,7 @@
 package document.model;
+import document.service.DocumentManager;
+import document.service.DocumentService;
+
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -74,7 +77,19 @@ public class Document implements Serializable {
         System.out.println("New version number -> " + newVersionNumber);
         System.out.println("New version content -> " + version.getContent());
         versions.add(version);
-        System.out.println(versions);
+//        DocumentService documentService = new DocumentService();
+//        documentService.addVersionToDocument(this.documentId, content, userId);
+
+        //Document doc = DocumentService.documents.get(this.documentId);
+
+
+
+
+//        DocumentManager documentManager = new DocumentManager();
+//        DocumentService documentService = new DocumentService();
+//        documentService.addDocument(this);
+//        documentManager.saveDocuments(documentService.getDocuments());
+        System.out.println("Printing from CreateNewVersion in Document.java -> " + versions);
         //return version;
     }
 
@@ -96,6 +111,7 @@ public class Document implements Serializable {
     }
 
     public void printDocumentData() {
+
         System.out.println("Title: " + title);
         System.out.println("Description: " + description);
         System.out.println("Author ID: " + authorId);

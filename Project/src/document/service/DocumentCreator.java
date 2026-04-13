@@ -58,15 +58,30 @@ public class DocumentCreator {
 
 
         DocumentManager documentManager = new DocumentManager();
+        DocumentService documentService = new DocumentService();
 
-        Document document1 = documentManager.addDocument("JavaExamples", "Java code and examples.", id3, DocumentType.TXT);
-        document1.createNewVersion("JavaFunctions is the most important thing, this means you have to learn!", id3);
+//        Document document1 = documentManager.addDocument("JavaExamples", "Java code and examples.", id3, DocumentType.TXT);
+//        document1.createNewVersion("JavaFunctions is the most important thing, this means you have to learn!", id3);
+//        Document document2 = documentManager.addDocument("JavaCourses", "Java coding and courses.", id3, DocumentType.XML);
+//        document1.createNewVersion("JavaFunctions is the most important thing, this means you have to learn! I have added this.", id4);
+//        document1.createNewVersion("JavaFunctions2", id2);
+
+
+        Document document1 = documentManager.addDocument("JavaExamples","Java code and examples.", id3, DocumentType.TXT);
+
+        documentService.addVersionToDocument(document1.getDocumentId(), "JavaFunctions is the most important thing, this means you have to learn!", id3);
+
         Document document2 = documentManager.addDocument("JavaCourses", "Java coding and courses.", id3, DocumentType.XML);
-        document1.createNewVersion("JavaFunctions is the most important thing, this means you have to learn! I have added this.", id4);
-        document1.createNewVersion("JavaFunctions2", id2);
+
+        documentService.addVersionToDocument(document2.getDocumentId(),"JavaFunctions is the most important thing, this means you have to learn! I have added this.", id4);
+
+        documentService.addVersionToDocument(document1.getDocumentId(),"JavaFunctions2", id2);
+
+
+
 
         Document document3 = documentManager.addDocument("C# Courses", "c# coding and courses.", id4, DocumentType.DOCX);
-        document3.createNewVersion("Here you can learn about C#, step-by-step,", id4);
+        documentService.addVersionToDocument(document2.getDocumentId(), "Here you can learn about C#, step-by-step,", id4);
 
         List<DocumentVersion> doc1versions = document1.getAllVersions();
         for (DocumentVersion documentVersion : doc1versions) {

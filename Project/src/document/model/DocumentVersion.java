@@ -1,7 +1,8 @@
 package document.model;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
-public class DocumentVersion {
+public class DocumentVersion implements Serializable {
 
     private final int authorId;
     private final int versionNumber;
