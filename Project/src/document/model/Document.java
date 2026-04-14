@@ -126,4 +126,14 @@ public class Document implements Serializable {
         }
     }
 
+    public int getId() {
+        return documentId;
+    }
+
+    public String getVersionContent(int versionNumber) {
+        return versions.get(versionNumber).getContent();
+    }
+    public DocumentVersion getVersion(int versionNumber) {
+        return versions.get(versionNumber);
+    }
 }

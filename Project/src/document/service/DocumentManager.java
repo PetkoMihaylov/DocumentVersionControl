@@ -45,6 +45,7 @@ public class DocumentManager {
 
 
     public Document addDocument(String title, String description, int authorId, DocumentType documentType) throws DocumentCreationException {
+        //THIS method is actually the one that has to be called when creating a new document)
         //add try and exception?
         Document document = createDocument(title, description, authorId, documentType);
         synchronized (documentsLock) {
@@ -58,9 +59,11 @@ public class DocumentManager {
     }
 
     private static Document createDocument(String title, String description, int authorId, DocumentType documentType) throws DocumentCreationException {
+        //why did I separate this class createDocument again and use addDocument to call it?? FIX IF YOU HAVE TIME
         //add checks for null etc.
         Document document = new Document(title, description, authorId, documentType);
-        documentService.addDocument(document);
+        documentService.addDocument(document); //this was not commented before 14.04.2026, does it mean duplicates were created?
+        //documentService.addDocument(document);
         return document;
         /*switch (documentType) {
 

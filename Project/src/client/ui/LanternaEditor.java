@@ -95,4 +95,5 @@ public class LanternaEditor {
 
         System.out.println("-------------\n");
     }
+
 }

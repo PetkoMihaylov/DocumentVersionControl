@@ -16,7 +16,7 @@ public class DocumentVersion implements Serializable {
         this.versionNumber = versionNumber;
         this.createdAt = LocalDateTime.now(); //now for when it's initialized?
         this.content = content;
-        this.status = DocumentVersionStatus.DRAFT;//type;
+        this.status = DocumentVersionStatus.DRAFT; //default type;
     }
 
     public int getVersionNumber() {
@@ -39,6 +39,16 @@ public class DocumentVersion implements Serializable {
         this.status = status;
     }
 
+    public DocumentVersion getDraft() {
+        if(status == DocumentVersionStatus.DRAFT) {
+            return this;
+        }
+        return null;
+    }
 
 
+//    public void setContent(String content) {
+    //because it is final, cannot change history, but is this restriction by the project description?
+//        this.content = content;
+//    }
 }

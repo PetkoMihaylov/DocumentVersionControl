@@ -2,6 +2,8 @@ package menu;
 
 import customExceptions.UserCreationException;
 import document.model.Document;
+import document.model.DocumentType;
+import document.model.DocumentVersion;
 import document.service.DocumentService;
 import manager.UserManager;
 import model.*;
@@ -121,31 +123,132 @@ public class UserMenuHandler {
         }
     }
 
-    private void authorMenu(Scanner sc, PrintStream out, Author author) {
-        out.println("Logged in as author!");
-        out.println("Choose what action you want to take: " + Arrays.toString(userManager.getAuthorActions().toArray()));
 
-        if(sc.nextLine().equalsIgnoreCase("L")) { //LIST_DOCUMENTS
-            out.print("Choose which of the following documents you want to view!");
+    private void authorMenu(Scanner sc, PrintStream out, Author author) {
+        out.println("Logged in as author.");
+//        out.println("Choose what action you want to take: " + Arrays.toString(userManager.getAuthorActions().toArray()));
+//
+//        if(sc.nextLine().equalsIgnoreCase("L")) { //LIST_DOCUMENTS
+//            out.print("Choose which of the following documents you want to view!");
+//            try {
+//                System.out.println(documentService.getDocuments());
+//                List<Document> documentsList =  documentService.getDocuments();
+//                //out.println(documentsList);
+//                for(Document document : documentsList) {sype.");
+//            }
+//        }
+
+        System.out.println("\nEntered author!\n");
+        while (true) {
             try {
-                System.out.println(documentService.getDocuments());
-                List<Document> documentsList =  documentService.getDocuments();
-                //out.println(documentsList);
-                for(Document document : documentsList) {
-                    System.out.println("This doc: " + document.getDocumentId() + " with " + document.getTitle());
-                    System.out.println("Here are the versions -> " + document.getAllVersions());
-                    document.printDocumentData();
+                System.out.println("Waiting for request...");
+
+                String request = readRequest(sc);
+
+                if (request == null || request.isEmpty()) {
+                    System.out.println("Client disconnected.");
+                    break;
                 }
 
+                String[] lines = request.split("\n");
+                String command = lines[0];
 
-                out.println("Success.");
-            } catch (IllegalArgumentException e) {
-                out.println("Error: Invalid user type.");
+                System.out.println("\nThe command is -> " + command + "\n");
+
+                switch (command) {
+
+                    case "CREATE_DOCUMENT" -> {
+                        String title = lines[1];
+                        String description = lines[2];
+                        int authorId = author.getUserId();
+                        DocumentType documentType = DocumentType.valueOf(lines[3]);
+
+                        documentService.createDocument(title, description, authorId, documentType);
+
+                        sendResponse(out, "OK", "Document created");
+                    }
+
+                    case "CREATE_VERSION" -> {
+                        int docId = Integer.parseInt(lines[1]);
+                        String content = lines[2];
+                        int authorId = author.getUserId();
+
+                        documentService.createVersion(docId, content, authorId);
+
+                        sendResponse(out, "OK", "Version created");
+                    }
+
+                    case "LIST_DOCUMENTS" -> {
+                        List<Document> docs = documentService.getAllDocuments();
+
+                        List<String> response = new ArrayList<>();
+                        for (Document document : docs) {
+                            response.add(document.getId() + " - " + document.getTitle());
+                        }
+
+                        sendResponse(out, response.toArray(new String[0]));
+                    }
+
+                    case "VIEW_VERSIONS" -> {
+                        int docId = Integer.parseInt(lines[1]);
+
+                        List<DocumentVersion> versions = documentService.getVersions(docId);
+
+                        List<String> response = new ArrayList<>();
+
+                        for (DocumentVersion v : versions) {
+                            response.add("Version " + v.getVersionNumber() + " - " + v.getStatus());
+                        }
+
+                        sendResponse(out, response.toArray(new String[0]));
+                    }
+
+                    case "VIEW_DRAFT" -> {
+                        int docId = Integer.parseInt(lines[1]);
+                        int versionNumber = Integer.parseInt(lines[2]);
+
+                        String content = documentService.getDraftContent(docId, versionNumber);
+
+                        sendResponse(out, content);
+                    }
+
+                    case "EXIT" -> {
+                        System.out.println("Client requested exit.");
+                        break;
+                    }
+
+                    default -> {
+                        sendResponse(out, "ERROR", "Unknown command");
+                    }
+                }
+
+            } catch (Exception e) {
+                System.out.println("Error occurred: " + e.getMessage());
+                break;
             }
         }
     }
 
-    public static void sendCommand(PrintStream out, String command) {
+
+    public static String readRequest(Scanner sc) {
+        StringBuilder request = new StringBuilder();
+        String line;
+
+        while (!(line = sc.nextLine()).equals("END")) {
+            request.append(line).append("\n");
+        }
+
+        return request.toString();
+    }
+    public static void sendResponse(PrintStream out, String... lines) {
+        for (String line : lines) {
+            out.println(line);
+        }
+        out.println("END");
+    }
+
+
+    /*public static void sendCommand(PrintStream out, String command) {
         out.println(command);
         out.println("END");
     }
@@ -159,7 +262,7 @@ public class UserMenuHandler {
         }
 
         return sb.toString();
-    }
+    }*/
 
 
 }

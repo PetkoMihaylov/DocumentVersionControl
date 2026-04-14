@@ -1,7 +1,12 @@
 package manager;
 
 enum AuthorActions {
+    CREATE_DOCUMENT,
+    CREATE_VERSION,
     LIST_DOCUMENTS,
     VIEW_DOCUMENT,
-    EDIT_DOCUMENT
+    LIST_DRAFTS,
+    VIEW_DRAFTS,
+    EDIT_DRAFT_DOCUMENT,
+    VIEW_DOCUMENT_HISTORY
 }
