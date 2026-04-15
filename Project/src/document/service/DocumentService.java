@@ -1,10 +1,9 @@
 package document.service;
 
-import customExceptions.DocumentCreationException;
+import exceptions.DocumentCreationException;
 import document.model.Document;
 import document.model.DocumentType;
 import document.model.DocumentVersion;
-import manager.UserManager;
 
 
 import java.util.*;

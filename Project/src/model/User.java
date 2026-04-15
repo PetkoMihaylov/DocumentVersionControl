@@ -6,19 +6,28 @@ import java.util.concurrent.atomic.AtomicInteger;
 import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 
-public abstract class User implements Serializable
+public class User implements Serializable
 {
     private static final AtomicInteger counter = new AtomicInteger(1);
     private final int id;
     private String userName;
     private String password;
+    private Role role;
 
     private static Set<String> usernames = ConcurrentHashMap.newKeySet();
 
-    public User(String userName, String password) {
+    public User(String userName, String password, Role role) {
         this.id = counter.getAndIncrement();
         setUserName(userName);
         setPassword(password);
+        setRole(role);
+    }
+
+    private void setRole(Role role) {
+        this.role = role;
+    }
+    public Role getUserRole() {
+        return role;
     }
 
     private void setUserName(String userName) {
@@ -35,8 +44,6 @@ public abstract class User implements Serializable
         this.password = password;
     }
 
-
-    public abstract UserType getUserType();
 
     public String getUserName() {
         return userName;

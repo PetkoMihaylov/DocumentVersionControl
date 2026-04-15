@@ -1,7 +1,6 @@
 package document.service;
 
-import customExceptions.CredentialsException;
-import customExceptions.UserCreationException;
+import exceptions.UserCreationException;
 import document.model.Document;
 import document.model.DocumentType;
 import document.model.DocumentVersion;
@@ -11,8 +10,6 @@ import model.*;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
-
-import static java.util.logging.Level.SEVERE;
 
 public class DocumentCreator {
 
@@ -24,7 +21,7 @@ public class DocumentCreator {
         UserManager userManager = new UserManager();
 
 
-        //User reviewer1 = new Reviewer("User1", "123");
+        //User reviewer1 = new User("User1", "123");
 
         User reviewer1 = null;
         User reviewer2 = null;
@@ -32,11 +29,11 @@ public class DocumentCreator {
         User author2 = null;
         User reader1 = null;
         try {
-            reviewer1 = userManager.registerUser("Reviewer1", "123", UserType.REVIEWER);
-            reviewer2 = userManager.registerUser("Reviewer2", "123", UserType.REVIEWER);
-            author1 = userManager.registerUser("Author1", "123", UserType.AUTHOR);
-            author2 = userManager.registerUser("Author2", "123", UserType.AUTHOR);
-            reader1 = userManager.registerUser("Reader1", "123", UserType.READER);
+            reviewer1 = userManager.registerUser("Reviewer1", "123", Role.REVIEWER);
+            reviewer2 = userManager.registerUser("Reviewer2", "123", Role.REVIEWER);
+            author1 = userManager.registerUser("Author1", "123", Role.AUTHOR);
+            author2 = userManager.registerUser("Author2", "123", Role.AUTHOR);
+            reader1 = userManager.registerUser("Reader1", "123", Role.READER);
         } catch (UserCreationException e) {
             logger.log(Level.SEVERE, "Error occurred", e);
         }

@@ -1,14 +1,11 @@
 package document.service;
 
-import customExceptions.DocumentCreationException;
-import customExceptions.IncompatibleDocumentDataException;
-import customExceptions.IncompatibleUserDataException;
+import exceptions.DocumentCreationException;
+import exceptions.IncompatibleDocumentDataException;
 import document.model.Document;
 import document.model.DocumentType;
 import document.model.DocumentVersion;
 import document.model.DocumentVersionStatus;
-import model.Administrator;
-import model.User;
 import org.xml.sax.SAXException;
 
 import javax.xml.parsers.ParserConfigurationException;
@@ -68,19 +65,19 @@ public class DocumentManager {
         /*switch (documentType) {
 
             case TXT: {
-                return new Administrator(userName, password);
+
             }
             case JSON: {
-                return new D(userName, password);
+
             }
             case XML: {
-                return new Reviewer(userName, password);
+
             }
             case DOC: {
-                return new Reader(userName, password);
+
             }
             case DOCX: {
-                return new Reader(userName, password);
+
             }
 
             default:

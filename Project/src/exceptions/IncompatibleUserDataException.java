@@ -1,4 +1,4 @@
-package customExceptions;
+package exceptions;
 
 import java.io.InvalidClassException;
 

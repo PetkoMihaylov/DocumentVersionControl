@@ -1,4 +1,4 @@
-package customExceptions;
+package exceptions;
 
 public class DocumentCreationException extends RuntimeException {
     public DocumentCreationException(String message) {

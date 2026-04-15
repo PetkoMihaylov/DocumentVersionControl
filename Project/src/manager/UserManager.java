@@ -2,10 +2,9 @@ package manager;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
-import customExceptions.IncompatibleUserDataException;
-import customExceptions.UserCreationException;
+import exceptions.IncompatibleUserDataException;
+import exceptions.UserCreationException;
 import model.*;
-import model.Reader;
 
 import java.io.*;
 import java.util.*;
@@ -32,7 +31,7 @@ public class UserManager {
             return;
         }
         List<User> users = new ArrayList<>();
-        User admin = new Administrator("admin", "12345");
+        User admin = new User("admin", "12345", Role.ADMINISTRATOR);
         users.add(admin);
         userService.addUser(admin);
         saveUsers(users);
@@ -52,23 +51,23 @@ public class UserManager {
     }
 
 
-    private static User createUser(String userName, String password, UserType userType) throws UserCreationException {
+    private static User createUser(String userName, String password, Role role) throws UserCreationException {
         if (password.length() < 3) {
             throw new UserCreationException("Error: Password must be at least 5 characters");
         }
-        switch (userType) {
+        switch (role) {
 
             case ADMINISTRATOR: {
-                return new Administrator(userName, password);
+                return new User(userName, password, role);
             }
             case AUTHOR: {
-                return new Author(userName, password);
+                return new User(userName, password, role);
             }
             case REVIEWER: {
-                return new Reviewer(userName, password);
+                return new User(userName, password, role);
             }
             case READER: {
-                return new Reader(userName, password);
+                return new User(userName, password, role);
             }
 
             default:
@@ -76,9 +75,9 @@ public class UserManager {
         }
     }
 
-    public User registerUser(String userName, String password, UserType userType) throws UserCreationException {
+    public User registerUser(String userName, String password, Role role) throws UserCreationException {
         //add try and exception?
-        User user = UserManager.createUser(userName, password, userType);
+        User user = UserManager.createUser(userName, password, role);
         synchronized (usersLock) {
             List<User> users = loadUsers();
             users.add(user);

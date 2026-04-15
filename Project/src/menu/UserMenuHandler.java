@@ -1,13 +1,12 @@
 package menu;
 
-import customExceptions.UserCreationException;
+import exceptions.UserCreationException;
 import document.model.Document;
 import document.model.DocumentType;
 import document.model.DocumentVersion;
 import document.service.DocumentService;
 import manager.UserManager;
 import model.*;
-import model.Reader;
 
 import java.io.*;
 import java.util.*;
@@ -55,37 +54,37 @@ public class UserMenuHandler {
                 continue;
             }
 
-            switch (user.getUserType())
+            switch (user.getUserRole())
             {
                 case ADMINISTRATOR:
                 {
-                    adminMenu(sc, out, (Administrator) user);
+                    adminMenu(sc, out, user);
                     break;
                 }
                 case AUTHOR:
                 {
-                    authorMenu(sc, out, (Author) user);
+                    authorMenu(sc, out, user);
                     break;
                 }
                 case REVIEWER:
                 {
-                    reviewerMenu(sc, out, (Reviewer) user);
+                    reviewerMenu(sc, out, user);
                     break;
                 }
                 case READER:
                 {
-                    readerMenu(sc, out, (model.Reader) user);
+                    readerMenu(sc, out, user);
                     break;
                 }
             }
         }
     }
 
-    private void readerMenu(Scanner sc, PrintStream out, Reader user) {
+    private void readerMenu(Scanner sc, PrintStream out, User user) {
         out.println("Logged in as reader!");
     }
 
-    private void reviewerMenu(Scanner sc, PrintStream out, Reviewer user) {
+    private void reviewerMenu(Scanner sc, PrintStream out, User user) {
         out.println("Logged in as reviewer!");
     }
 
@@ -94,7 +93,7 @@ public class UserMenuHandler {
 
 
 
-    private void adminMenu(Scanner sc, PrintStream out, Administrator admin)
+    private void adminMenu(Scanner sc, PrintStream out, User admin)
     {
         out.println("Logged in as admin.");
         out.println("Choose what action you want to take: " + Arrays.toString(userManager.getAdminActions().toArray()));
@@ -102,9 +101,9 @@ public class UserMenuHandler {
 
 
         if(sc.nextLine().equalsIgnoreCase("CREATE_USER")) {
-            out.println("Enter user type to create: " + Arrays.toString(UserType.values()) + ";");
+            out.println("Enter user type to create: " + Arrays.toString(Role.values()) + ";");
             try {
-                UserType userType = UserType.valueOf(sc.nextLine().toUpperCase());
+                Role role = Role.valueOf(sc.nextLine().toUpperCase());
 
                 out.println("Enter username:");
                 String userName = sc.nextLine();
@@ -112,7 +111,7 @@ public class UserMenuHandler {
                 out.println("Enter password:");
                 String password = sc.nextLine();
 
-                userManager.registerUser(userName, password, userType);
+                userManager.registerUser(userName, password, role);
 
                 out.println("Success.");
             } catch (IllegalArgumentException e) {
@@ -124,7 +123,7 @@ public class UserMenuHandler {
     }
 
 
-    private void authorMenu(Scanner sc, PrintStream out, Author author) {
+    private void authorMenu(Scanner sc, PrintStream out, User author) {
         out.println("Logged in as author.");
 //        out.println("Choose what action you want to take: " + Arrays.toString(userManager.getAuthorActions().toArray()));
 //

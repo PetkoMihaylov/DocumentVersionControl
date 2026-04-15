@@ -1,4 +1,4 @@
-package customExceptions;
+package exceptions;
 
 public class UserCreationException extends Exception
 {

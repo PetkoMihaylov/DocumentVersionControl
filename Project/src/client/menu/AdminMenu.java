@@ -6,7 +6,7 @@ import java.util.Scanner;
 public class AdminMenu {
     public static void showAdminMenu(Scanner console, Scanner sc, PrintStream out)
     {
-        // UserType
+        // UserRole
         System.out.println(sc.nextLine());
         out.println(console.nextLine());
 
