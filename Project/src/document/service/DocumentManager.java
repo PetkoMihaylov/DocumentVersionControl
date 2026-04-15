@@ -109,7 +109,7 @@ public class DocumentManager {
             List<Document> documentsList = checkIfObjectIsValid(obj); //it is not needed, but it makes it more readable?
 
             System.out.println("\nI am passing through load documents!\n\n");
-            System.out.println(documentsList.getLast().getAllVersions());
+            //System.out.println(documentsList.getLast().getAllVersions());
             System.out.println("\n\n");
 
             if(!documentsList.isEmpty()){

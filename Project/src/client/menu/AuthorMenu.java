@@ -69,6 +69,9 @@ public class AuthorMenu {
                 }
 
                 case 2 -> {
+                    sendCommand(out, "LIST_DOCUMENTS");
+                    System.out.println(readResponse(sc));
+                    System.out.println("Select a Document by the ID!");
                     System.out.print("Document ID: ");
                     String docId = console.nextLine();
 
@@ -98,8 +101,10 @@ public class AuthorMenu {
                 case 5 -> {
                     System.out.print("Document ID: ");
                     String docId = console.nextLine();
+                    System.out.print("Version Number: ");
+                    String versionNumber = console.nextLine();
 
-                    sendCommand(out, "VIEW_DRAFT", docId);
+                    sendCommand(out, "VIEW_DRAFT", docId, versionNumber);
                     String content = readResponse(sc);
 
                     // opening LanternaEditor
@@ -112,9 +117,9 @@ public class AuthorMenu {
                     }
 
                     // after editing
-//                    String edited = editor.getEditedText(); // you need to add this method
-//
-//                    sendCommand(out,"EDIT_DRAFT", docId, edited);
+                    String edited = editor.getEditedText(); // you need to add this method
+
+                    sendCommand(out,"EDIT_DRAFT", docId, edited);
 
                     System.out.println(readResponse(sc));
                 }

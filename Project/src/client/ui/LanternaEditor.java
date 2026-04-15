@@ -4,18 +4,24 @@ import com.googlecode.lanterna.TerminalSize;
 import com.googlecode.lanterna.gui2.GridLayout;
 import com.googlecode.lanterna.gui2.*;
 //import com.googlecode.lanterna.gui2.TextBox;
-import com.googlecode.lanterna.terminal.Terminal;
+import com.googlecode.lanterna.input.KeyStroke;
+import com.googlecode.lanterna.input.KeyType;
 import com.googlecode.lanterna.screen.Screen;
 import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 
 public class LanternaEditor {
 
-    private String oldContent;
+    private final String oldContent;
+    private String newContent;
 
     public LanternaEditor(String oldContent) {
         this.oldContent = oldContent;
+        this.newContent = oldContent;
     }
 
     public void start() throws IOException {
@@ -27,7 +33,8 @@ public class LanternaEditor {
 
         BasicWindow window = new BasicWindow("Document Editor");
 
-        Panel mainPanel = new Panel(new GridLayout(2));
+        Panel mainPanel = new Panel(new GridLayout(5));
+
 
         // the left panel (Old version)
         TextBox leftBox = new TextBox(new TerminalSize(40, 20));
@@ -36,46 +43,175 @@ public class LanternaEditor {
 
         // the right panel (New version where you can edit)
         TextBox rightBox = new TextBox(new TerminalSize(40, 20));
+        rightBox.setText(oldContent);
+        //window.setFocusedInteractable(rightBox);
+
+        //left difference
+        TextBox leftDiff = new TextBox(new TerminalSize(3, 20));
+        leftDiff.setReadOnly(true);
+        //right difference
+        TextBox rightDiff = new TextBox(new TerminalSize(3, 20));
+        rightDiff.setReadOnly(true);
+
+
+        EmptySpace emptySpace = new EmptySpace(new TerminalSize(2, 20));
+
+//        TextBox diffBox = new TextBox(new TerminalSize(1, 20));
+//        diffBox.setReadOnly(true);
+
 
         // buttons
         Button saveButton = new Button("Save (Ctrl+S)", () -> {
-            String newContent = rightBox.getText();
+            newContent = rightBox.getText();
             System.out.println("Saving new version...");
             System.out.println(newContent);
-
             // add DocumentService here for saving?
         });
 
+//        Button diffButton = new Button("Show Diff (Ctrl+D)", () -> {
+//            showDiff(oldContent, rightBox.getText());
+//        });
         Button diffButton = new Button("Show Diff (Ctrl+D)", () -> {
-            showDiff(oldContent, rightBox.getText());
+            showSideBySideDifference(oldContent, rightBox.getText(), leftDiff, rightDiff);
         });
 
+        //String differences = getDifference(oldContent, rightBox.getText());
+//        Button diffButtonLanterna = new Button("Show Difference in Lanterna (Ctrl+E)", () -> {
+//            String diff = getDifference(oldContent, rightBox.getText());
+//            diffBox.setText(diff);
+//        });
+
+        //panel
         Panel buttonPanel = new Panel();
         buttonPanel.addComponent(saveButton);
         buttonPanel.addComponent(diffButton);
 
+        mainPanel.addComponent(leftDiff);
         mainPanel.addComponent(leftBox);
+        mainPanel.addComponent(emptySpace);
+        mainPanel.addComponent(rightDiff);
         mainPanel.addComponent(rightBox);
 
+        StringBuilder leftDiffText = new StringBuilder();
+        StringBuilder rightDiffText = new StringBuilder();
+
+        //mainPanel.addComponent(leftBox);
+        //mainPanel.addComponent(diffBox);
+        //mainPanel.addComponent(rightBox);
+
         Panel root = new Panel();
-        root.setLayoutManager(new LinearLayout(Direction.VERTICAL));
+
+        mainPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
+        buttonPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
+
+
+        //mainPanel.withBorder(Borders.singleLine("Editor"));
+        //buttonPanel.withBorder(Borders.singleLine("Actions"));
+
+        mainPanel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
+        window.setHints(java.util.Arrays.asList(Window.Hint.EXPANDED));
+        //buttonPanel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Beginning));
+
         root.addComponent(mainPanel);
+        //root.addComponent(diffButtonLanterna);
         root.addComponent(buttonPanel);
 
         window.setComponent(root);
 
+        //window.setHints(Arrays.asList(Window.Hint.EXPANDED));
+        //window.setFixedSize(new TerminalSize(460, 100));
+
+        window.addWindowListener(new WindowListenerAdapter() {
+            @Override
+            public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+                if (keyStroke.getKeyType() == KeyType.Enter) {
+                    showSideBySideDifference(oldContent, rightBox.getText(), leftDiff, rightDiff);
+                }
+            }
+        });
+
+
+
+
+
+
+
+        rightBox.takeFocus();
         gui.addWindowAndWait(window);
+
+
+
     }
 
     // method for showing differences from content/text with -> (~ + -)
-    private void showDiff(String oldText, String newText) {
+//    private void showDiff(String oldText, String newText) {
+//
+//        System.out.println("\n--- DIFFERENCES ---");
+//
+//        String[] oldLines = oldText.split("\n");
+//        String[] newLines = newText.split("\n");
+//
+//        int max = Math.max(oldLines.length, newLines.length);
+//
+//        for (int i = 0; i < max; i++) {
+//
+//            String oldLine = i < oldLines.length ? oldLines[i] : null;
+//            String newLine = i < newLines.length ? newLines[i] : null;
+//
+//            if (oldLine == null) {
+//                System.out.println("+ " + newLine);
+//            } else if (newLine == null) {
+//                System.out.println("- " + oldLine);
+//            } else if (!oldLine.equals(newLine)) {
+//                System.out.println("~ " + newLine);
+//            } else {
+//                System.out.println("  " + newLine);
+//            }
+//        }
+//
+//        System.out.println("-------------\n");
+//    }
+//
+//    private String getDifference(String oldText, String newText) {
+//        StringBuilder result = new StringBuilder();
+//
+//        String[] oldLines = oldText.split("\n");
+//        String[] newLines = newText.split("\n");
+//
+//        int max = Math.max(oldLines.length, newLines.length);
+//
+//        for (int i = 0; i < max; i++) {
+//            String oldLine = i < oldLines.length ? oldLines[i] : null;
+//            String newLine = i < newLines.length ? newLines[i] : null;
+//
+//            if (oldLine == null) {
+//                result.append("+ ").append(newLine).append("\n");
+//            } else if (newLine == null) {
+//                result.append("- ").append(oldLine).append("\n");
+//            } else if (!oldLine.equals(newLine)) {
+//                result.append("~ ").append(newLine).append("\n");
+//            } else {
+//                result.append("  ").append(newLine).append("\n");
+//            }
+//        }
+//
+//        return result.toString();
+//    }
 
-        System.out.println("\n--- DIFFERENCES ---");
+
+    public String getEditedText() {
+        return newContent;
+    }
+
+    private void showSideBySideDifference(String oldText, String newText, TextBox leftDiff, TextBox rightDiff) {
 
         String[] oldLines = oldText.split("\n");
         String[] newLines = newText.split("\n");
 
         int max = Math.max(oldLines.length, newLines.length);
+
+        StringBuilder leftDiffText = new StringBuilder();
+        StringBuilder rightDiffText = new StringBuilder();
 
         for (int i = 0; i < max; i++) {
 
@@ -83,17 +219,29 @@ public class LanternaEditor {
             String newLine = i < newLines.length ? newLines[i] : null;
 
             if (oldLine == null) {
-                System.out.println("+ " + newLine);
+                // line added in new the new version
+                leftDiffText.append(" ").append("\n");
+                rightDiffText.append("+").append("\n");
+
             } else if (newLine == null) {
-                System.out.println("- " + oldLine);
+                // line removed from the old version
+                leftDiffText.append("-").append("\n");
+                rightDiffText.append(" ").append("\n");
+
             } else if (!oldLine.equals(newLine)) {
-                System.out.println("~ " + newLine);
+                // edited
+                leftDiffText.append("~").append("\n");
+                rightDiffText.append("~").append("\n");
+
             } else {
-                System.out.println("  " + newLine);
+                // no edit
+                leftDiffText.append(" ").append("\n");
+                rightDiffText.append(" ").append("\n");
             }
         }
 
-        System.out.println("-------------\n");
+        leftDiff.setText(leftDiffText.toString());
+        rightDiff.setText(rightDiffText.toString());
     }
 
 }
