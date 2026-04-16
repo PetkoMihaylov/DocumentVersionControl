@@ -27,10 +27,18 @@ public class DocumentService {
     public void addVersionToDocument(int documentId, String content, int userId){
         Document document = documents.get(documentId);
         if (document != null) {
-            document.createNewVersion(content, userId);
-
+            DocumentVersion version = document.createNewVersion(content, userId);
+            System.out.println(version + " has been added to the document -> " + document.getLatestVersion());
             DocumentManager documentManager = new DocumentManager();
             documentManager.saveDocuments(new ArrayList<>(documents.values()));
+            System.out.println("DOCUMENT VALUES -> " + documents.values());
+            System.out.println();
+            document.printDocumentData();
+            version.printAllVersionData();
+            System.out.println();
+            for(int i = 0; i < documents.size(); i++){
+                    //System.out.println("Print addVersionToDocument -> " + i + " -> " + documents.get(i).getAllVersions());
+            }
         }
     }
 
@@ -71,6 +79,12 @@ public class DocumentService {
     public String getDraftContent(int docId, int versionNumber) {
         return documents.get(docId).getVersionContent(versionNumber);
     }
+
+    public List<String> getDocumentTypes() {
+        return Collections.singletonList(Arrays.toString(DocumentType.values()));
+    }
+
+
 
 //    public void updateDraft(int docId, int versionNumber, String content) {
 //        documents.get(docId).getVersion(versionNumber).setContent(content);

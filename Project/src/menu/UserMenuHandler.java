@@ -137,7 +137,7 @@ public class UserMenuHandler {
 //            }
 //        }
 
-        System.out.println("\nEntered author!\n");
+        System.out.println("\nEntered as author!\n");
         while (true) {
             try {
                 System.out.println("Waiting for request...");
@@ -146,6 +146,11 @@ public class UserMenuHandler {
 
                 if (request == null || request.isEmpty()) {
                     System.out.println("Client disconnected.");
+                    break;
+                }
+                else if (request.equals("exit"))
+                {
+                    out.println("Goodbye!");
                     break;
                 }
 
@@ -159,12 +164,10 @@ public class UserMenuHandler {
                     case "CREATE_DOCUMENT" -> {
                         String title = lines[1];
                         String description = lines[2];
+                        String documentType = lines[3];
                         int authorId = author.getUserId();
-                        DocumentType documentType = DocumentType.valueOf(lines[3]);
-
-                        documentService.createDocument(title, description, authorId, documentType);
-
-                        sendResponse(out, "OK", "Document created");
+                        documentService.createDocument(title, description, authorId, DocumentType.valueOf(documentType));
+                        sendResponse(out, "OK", "Document created!");
                     }
 
                     case "CREATE_VERSION" -> {
@@ -174,7 +177,7 @@ public class UserMenuHandler {
 
                         documentService.createVersion(docId, content, authorId);
 
-                        sendResponse(out, "OK", "Version created");
+                        sendResponse(out, "OK", "Version created!");
                     }
 
                     case "LIST_DOCUMENTS" -> {
@@ -187,6 +190,7 @@ public class UserMenuHandler {
 
                         sendResponse(out, response.toArray(new String[0]));
                     }
+
 
                     case "VIEW_VERSIONS" -> {
                         int docId = Integer.parseInt(lines[1]);
@@ -210,9 +214,34 @@ public class UserMenuHandler {
 
                         sendResponse(out, content);
                     }
+                    case "EDIT_DRAFT" -> {
+                        int docId = Integer.parseInt(lines[1]);
+                        int versionNumber = Integer.parseInt(lines[2]);
+                        String newContent = lines[3];
+                        //documentService.editDraftDocument(docId, versionNumber, newContent);
+                        sendResponse(out, "The draft is edited! A new version was created successfully!"); //add some other logic
+                    }
+
+                    case "LIST_DRAFTS" -> {
+                        int docId = Integer.parseInt(lines[1]);
+                        int versionNumber = Integer.parseInt(lines[2]);
+                        //String content = documentService.getAllDrafts();
+                        //sendResponse(out, content); //add some other logic
+                    }
+
+                    case "VIEW_DOCUMENT_HISTORY" -> {
+                        int docId = Integer.parseInt(lines[1]);
+                        //has to return all document info
+                    }
+                    case "REQUEST_DOCUMENT_TYPES" -> {
+                        List<String> documentTypes = documentService.getDocumentTypes();
+                        sendResponse(out, documentTypes.toArray(new String[0]));
+                    }
+
 
                     case "EXIT" -> {
                         System.out.println("Client requested exit.");
+                        out.println("You requested to exit. Goodbye!");
                         break;
                     }
 

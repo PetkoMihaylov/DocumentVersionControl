@@ -28,6 +28,7 @@ public class UserManager {
 
     private void initAdmins() {
         if (new File(USERS_FILENAME).exists()) {
+            loadUsers();
             return;
         }
         List<User> users = new ArrayList<>();

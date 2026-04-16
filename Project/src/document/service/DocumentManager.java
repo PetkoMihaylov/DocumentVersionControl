@@ -29,6 +29,7 @@ public class DocumentManager {
 
     private void initDocuments() {
         if (new File(DOCUMENTS_FILENAME).exists()) {
+            //loadDocuments(); //this breaks functionality
             return;
         }
         List<Document> documents = new ArrayList<>();
@@ -59,7 +60,7 @@ public class DocumentManager {
         //why did I separate this class createDocument again and use addDocument to call it?? FIX IF YOU HAVE TIME
         //add checks for null etc.
         Document document = new Document(title, description, authorId, documentType);
-        documentService.addDocument(document); //this was not commented before 14.04.2026, does it mean duplicates were created?
+        //documentService.addDocument(document); //this was not commented before 14.04.2026, does it mean duplicates were created?
         //documentService.addDocument(document);
         return document;
         /*switch (documentType) {
@@ -116,10 +117,38 @@ public class DocumentManager {
                 Map<Integer, Document> documentMap = new HashMap<>();
                 for (Document document : documentsList) {
                     documentMap.put(document.getDocumentId(), document);
+                    if(document.getAllVersions() != null){
+                        System.out.println("OHNO -> " + document.getAllVersions());
+                    }
                 }
-
                 documentService.setDocuments(documentMap);
             }
+            //the below part fixes the Atomic integer value
+            int maxId = 0;
+
+            for (Document document : documentsList) {
+                if (document.getDocumentId() > maxId) {
+                    maxId = document.getDocumentId();
+                    System.out.println("\nPrinting MAX " + maxId + "\n");
+                }
+            }
+
+
+
+
+
+            for (Document document : documentsList) {
+                if(document.versionsIsEmpty()){
+                    System.out.println("\n\n;(\n\n");
+                }
+                else{
+                    document.getLatestVersion();
+                }
+            }
+
+
+
+
             return documentsList;
         }
         catch (IOException e) {

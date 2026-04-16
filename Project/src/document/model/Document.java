@@ -1,6 +1,4 @@
 package document.model;
-import document.service.DocumentManager;
-import document.service.DocumentService;
 
 import java.io.Serializable;
 import java.util.ArrayList;
@@ -10,7 +8,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 
 public class Document implements Serializable {
 
-    private static final AtomicInteger counter = new AtomicInteger(1);
+    private static final AtomicInteger documentCounter = new AtomicInteger(1);
     private final int documentId;
     private String title;
     private String description;
@@ -22,13 +20,32 @@ public class Document implements Serializable {
     private ArrayList<DocumentVersion> versions;
 
     public Document(String title, String description, int authorId, DocumentType documentType) {
-        this.documentId = counter.getAndIncrement();
+        System.out.println("Print from Document -> counter-> " + documentCounter);
+        this.documentId = documentCounter.getAndIncrement();
+        System.out.println("Print from Document -> counterAFTERIncrement-> " + documentCounter);
         this.title = title;
         this.description = description;
         this.authorId = authorId;
         this.documentType = documentType;
         this.commentsByReviewer = new ArrayList<>();
         this.versions = new ArrayList<>();
+    }
+
+
+//    public int setVersionsCounter(DocumentVersion version) {
+//
+//        int maxId=1;
+//        for (DocumentVersion version : versions){
+//            if(version.getVersionNumber() > maxId){
+//                maxId = version.getVersionNumber() + 1;
+//                version.setCounter(maxId);
+//            }
+//        }
+//        return maxId;
+//    }
+    public static void setCounter(int value) {
+        documentCounter.set(value);
+        System.out.println("Print from Document.setCounter -> counter-> " + documentCounter);
     }
 
 
@@ -69,7 +86,7 @@ public class Document implements Serializable {
         return documentType.toString();
     }
 
-    public void createNewVersion(String content, int userId) {
+    public DocumentVersion createNewVersion(String content, int userId) {
         int newVersionNumber = versions.size() + 1;
 
         DocumentVersion version = new DocumentVersion(newVersionNumber, content, userId);
@@ -90,7 +107,7 @@ public class Document implements Serializable {
 //        documentService.addDocument(this);
 //        documentManager.saveDocuments(documentService.getDocuments());
         System.out.println("Printing from CreateNewVersion in Document.java -> " + versions);
-        //return version;
+        return version;
     }
 
     public DocumentVersion getLatestVersion() {
@@ -101,6 +118,9 @@ public class Document implements Serializable {
     }
 
     public List<DocumentVersion> getAllVersions() {
+        if (versions.isEmpty()) {
+            return null;
+        }
         return versions;
     }
 
@@ -131,9 +151,25 @@ public class Document implements Serializable {
     }
 
     public String getVersionContent(int versionNumber) {
+        if(versions.isEmpty()) {
+            System.out.println("I am from getVersionContent and versions is empty!\n");
+            //DocumentManager documentManager = new DocumentManager();
+            //documentManager.loadDocuments();
+        }
         return versions.get(versionNumber).getContent();
     }
     public DocumentVersion getVersion(int versionNumber) {
         return versions.get(versionNumber);
+    }
+
+    public ArrayList<DocumentVersion> getVersions() {
+        return versions;
+    }
+
+    public boolean versionsIsEmpty() {
+        if(versions.isEmpty()){
+            return true;
+        }
+        return false;
     }
 }

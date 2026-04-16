@@ -46,8 +46,11 @@ public class AuthorMenu {
                 1. Create Document
                 2. Create Version
                 3. List Documents
-                4. View Versions
-                5. Edit Draft
+                4. View Versions (of a document)
+                5. View Draft
+                6. Edit Draft
+                7. List Drafts
+                8. View Document History
                 0. Exit
                 """);
 
@@ -55,41 +58,48 @@ public class AuthorMenu {
 
             switch (choice) {
 
-                case 1 -> {
+                case 1 -> { //CREATE_DOCUMENT
                     System.out.print("Title: ");
                     String title = console.nextLine();
 
-                    System.out.print("Content: ");
-                    String content = console.nextLine();
+                    System.out.print("Description: ");
+                    String description = console.nextLine();
 
-                    sendCommand(out,"CREATE_DOCUMENT", title, content
-                    );
+                    sendCommand(out, "REQUEST_DOCUMENT_TYPES");
+                    System.out.print(readResponse(sc));
+
+                    System.out.println("What type of document from the listed do you want?");
+                    System.out.println("Document type: ");
+                    String documentType = console.nextLine();
+
+
+
+                    sendCommand(out,"CREATE_DOCUMENT", title, description, documentType);
 
                     System.out.println(readResponse(sc));
                 }
 
-                case 2 -> {
+                case 2 -> { //CREATE_VERSION (which is LIST_DOCUMENTS + CREATE_VERSION)
                     sendCommand(out, "LIST_DOCUMENTS");
                     System.out.println(readResponse(sc));
-                    System.out.println("Select a Document by the ID!");
+                    System.out.println("Select a Document by the ID you see!");
                     System.out.print("Document ID: ");
                     String docId = console.nextLine();
 
                     System.out.print("New content: ");
                     String content = console.nextLine();
 
-                    sendCommand(out,"CREATE_VERSION", docId, content
-                    );
+                    sendCommand(out,"CREATE_VERSION", docId, content);
 
                     System.out.println(readResponse(sc));
                 }
 
-                case 3 -> {
+                case 3 -> { //LIST_DOCUMENTS
                     sendCommand(out, "LIST_DOCUMENTS");
                     System.out.println(readResponse(sc));
                 }
 
-                case 4 -> {
+                case 4 -> { //VIEW_VERSIONS
                     System.out.print("Document ID: ");
                     String docId = console.nextLine();
 
@@ -97,8 +107,7 @@ public class AuthorMenu {
 
                     System.out.println(readResponse(sc));
                 }
-
-                case 5 -> {
+                case 5 -> { //VIEW_DRAFT
                     System.out.print("Document ID: ");
                     String docId = console.nextLine();
                     System.out.print("Version Number: ");
@@ -111,7 +120,26 @@ public class AuthorMenu {
                     LanternaEditor editor = new LanternaEditor(content);
 
                     try {
-                        editor.start();
+                        editor.startView();
+                    } catch (IOException e) {
+                        logger.log(Level.SEVERE, "Could not start Lanterna Editor", e);
+                    }
+                }
+
+                case 6 -> { //EDIT_DRAFT which is (VIEW+EDIT)
+                    System.out.print("Document ID: ");
+                    String docId = console.nextLine();
+                    System.out.print("Version Number: ");
+                    String versionNumber = console.nextLine();
+
+                    sendCommand(out, "VIEW_DRAFT", docId, versionNumber);
+                    String content = readResponse(sc);
+
+                    // opening LanternaEditor
+                    LanternaEditor editor = new LanternaEditor(content);
+
+                    try {
+                        editor.startEdit();
                     } catch (IOException e) {
                         logger.log(Level.SEVERE, "Could not start Lanterna Editor", e);
                     }
@@ -119,12 +147,13 @@ public class AuthorMenu {
                     // after editing
                     String edited = editor.getEditedText(); // you need to add this method
 
-                    sendCommand(out,"EDIT_DRAFT", docId, edited);
+                    sendCommand(out,"EDIT_DRAFT", docId, versionNumber, edited);
 
                     System.out.println(readResponse(sc));
                 }
 
                 case 0 -> {
+                    System.out.print("You exited!");
                     return;
                 }
             }

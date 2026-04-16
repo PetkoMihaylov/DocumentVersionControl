@@ -1,11 +1,11 @@
 package document.model;
 import java.io.Serializable;
 import java.time.LocalDateTime;
+import java.util.concurrent.atomic.AtomicInteger;
 
 public class DocumentVersion implements Serializable {
-
     private final int authorId;
-    private final int versionNumber;
+    private int versionNumber;
     private final LocalDateTime createdAt;
     private final String content;
     private DocumentVersionStatus status;
@@ -19,9 +19,17 @@ public class DocumentVersion implements Serializable {
         this.status = DocumentVersionStatus.DRAFT; //default type;
     }
 
+    public void setCounter(int value) {
+
+    }
+
     public int getVersionNumber() {
         return versionNumber;
     }
+//    public int getLatestVersionNumber(){
+//        return 0;
+//    }
+
     public String getContent() {
         return content;
     }
@@ -45,7 +53,14 @@ public class DocumentVersion implements Serializable {
         }
         return null;
     }
-
+    public void printAllVersionData(){
+        //System.out.println("Doc ID: " );
+        System.out.println("authorId: " + authorId);
+        System.out.println("versionNumber: " + versionNumber);
+        System.out.println("createdAt: " + createdAt);
+        System.out.println("content: " + content);
+        System.out.println("status: " + status);
+    }
 
 //    public void setContent(String content) {
     //because it is final, cannot change history, but is this restriction by the project description?
