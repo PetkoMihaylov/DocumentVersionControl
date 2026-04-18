@@ -29,7 +29,7 @@ public class DocumentManager {
 
     private void initDocuments() {
         if (new File(DOCUMENTS_FILENAME).exists()) {
-            //loadDocuments(); //this breaks functionality
+            //loadDocuments(); //this breaks functionality of loading. troubleshoot ASAP
             return;
         }
         List<Document> documents = new ArrayList<>();
@@ -105,6 +105,9 @@ public class DocumentManager {
 
 
     List<Document> loadDocuments() {
+        //add check if directory exists
+        //separate files for
+        //permissions folder/files
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(DOCUMENTS_FILENAME))) {
             Object obj = in.readObject();
             List<Document> documentsList = checkIfObjectIsValid(obj); //it is not needed, but it makes it more readable?
