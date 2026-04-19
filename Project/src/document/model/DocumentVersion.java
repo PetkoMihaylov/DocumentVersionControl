@@ -19,9 +19,6 @@ public class DocumentVersion implements Serializable {
         this.status = DocumentVersionStatus.DRAFT; //default type;
     }
 
-    public void setCounter(int value) {
-
-    }
 
     public int getVersionNumber() {
         return versionNumber;

@@ -20,115 +20,53 @@ public class DocumentManager {
     private static final String DOCUMENTS_FILENAME = "documents.bin";
     private static final Logger logger = Logger.getLogger(DocumentManager.class.getName());
 
-    private static DocumentService documentService = new DocumentService();
-    //private List<Document> documents = new ArrayList<>();
 
     public DocumentManager() {
-       initDocuments();
+        initDocuments();
     }
 
     private void initDocuments() {
         if (new File(DOCUMENTS_FILENAME).exists()) {
-            //loadDocuments(); //this breaks functionality of loading. troubleshoot ASAP
+            //loadDocuments(); //this breaks functionality of loading if called here. troubleshoot ASAP
             return;
         }
+
         List<Document> documents = new ArrayList<>();
         Document document = new Document("CExamples", "C code and examples.", 1, DocumentType.TXT);
         documents.add(document);
-        documentService.addDocument(document);
         saveDocuments(documents);
         DocumentCreator documentCreator = new DocumentCreator();
-        documentCreator.createNewDocuments("Adding test docs. It doesn't matter what this is right now.", 1);
+        documentCreator.createNewDocuments(new DocumentService(), "s", 1); //no matter what it's here
+
     }
 
-
-    public Document addDocument(String title, String description, int authorId, DocumentType documentType) throws DocumentCreationException {
-        //THIS method is actually the one that has to be called when creating a new document)
-        //add try and exception?
-        Document document = createDocument(title, description, authorId, documentType);
-        synchronized (documentsLock) {
-            List<Document> documents = loadDocuments();
-            documents.add(document);
-            documentService.addDocument(document);
-            //documentManager.addDocument(document); //for a local copy of all documents in a map with id? or just map
-            saveDocuments(documents);
-        }
-        return document;
-    }
-
-    private static Document createDocument(String title, String description, int authorId, DocumentType documentType) throws DocumentCreationException {
-        //why did I separate this class createDocument again and use addDocument to call it?? FIX IF YOU HAVE TIME
-        //add checks for null etc.
-        Document document = new Document(title, description, authorId, documentType);
-        //documentService.addDocument(document); //this was not commented before 14.04.2026, does it mean duplicates were created?
-        //documentService.addDocument(document);
-        return document;
-        /*switch (documentType) {
-
-            case TXT: {
-
-            }
-            case JSON: {
-
-            }
-            case XML: {
-
-            }
-            case DOC: {
-
-            }
-            case DOCX: {
-
-            }
-
-            default:
-                return null;
-        }
-
-         */
-        //return null;
-    }
-
-    private List<Document> checkIfObjectIsValid(Object obj){
-        List<?> tempList = (List<?>) obj;
-        if (obj instanceof List<?>) {
-
-            for (Object item : tempList) {
-                if (!(item instanceof Document)) {
-                    throw new ClassCastException("List contains non-Document elements");
-                }
-            }
-
-        }
-        return (List<Document>) tempList;
-    }
-
-
-    List<Document> loadDocuments() {
+    List<Document> loadDocumentsFromFile() {
         //add check if directory exists
-        //separate files for
+        //separate files for the different documents? XML...
         //permissions folder/files
+
+        File file = new File(DOCUMENTS_FILENAME);
+        if (!file.exists()) {
+            //no files present
+            System.out.print("no files");
+            return new ArrayList<>();
+        }
+
         try (ObjectInputStream in = new ObjectInputStream(new FileInputStream(DOCUMENTS_FILENAME))) {
             Object obj = in.readObject();
-            List<Document> documentsList = checkIfObjectIsValid(obj); //it is not needed, but it makes it more readable?
+            List<Document> documentsList = checkIfObjectIsValid(obj);
 
             System.out.println("\nI am passing through load documents!\n\n");
-            //System.out.println(documentsList.getLast().getAllVersions());
             System.out.println("\n\n");
 
-            if(!documentsList.isEmpty()){
-                Map<Integer, Document> documentMap = new HashMap<>();
-                for (Document document : documentsList) {
-                    documentMap.put(document.getDocumentId(), document);
-                    if(document.getAllVersions() != null){
-                        System.out.println("OHNO -> " + document.getAllVersions());
-                    }
+            for (Document document : documentsList) {
+                if (document.getAllVersions() != null && !document.getAllVersions().isEmpty()) {
+                    System.out.println("OHNO -> " + document.getAllVersions());
                 }
-                documentService.setDocuments(documentMap);
             }
-            //the below part fixes the Atomic integer value
-            int maxId = 0;
 
+            // maxId is for syncing the current new Document ID in Document
+            int maxId = 0;
             for (Document document : documentsList) {
                 if (document.getDocumentId() > maxId) {
                     maxId = document.getDocumentId();
@@ -136,25 +74,16 @@ public class DocumentManager {
                 }
             }
 
-
-
-
-
             for (Document document : documentsList) {
-                if(document.versionsIsEmpty()){
+                if (document.versionsIsEmpty()) {
                     System.out.println("\n\n;(\n\n");
-                }
-                else{
+                } else {
                     document.getLatestVersion();
                 }
             }
 
-
-
-
             return documentsList;
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             if (e instanceof InvalidClassException) {
                 //see if it is possible to happen when saving?
                 try {
@@ -162,26 +91,37 @@ public class DocumentManager {
                             " Serializable versions are not supported." +
                             " Recreate the documents file.", e);
                 } catch (IncompatibleDocumentDataException ex) {
-                    logger.log(Level.SEVERE, "Error occurred", e);
+                    logger.log(Level.SEVERE, "Error occurred", ex);
                 }
+            } else {
+                logger.log(Level.SEVERE, "Error occurred while loading documents", e);
             }
-        }
-        catch (ClassNotFoundException e)
-        {
+        } catch (ClassNotFoundException e) {
             // should never happen
             throw new IllegalStateException(e);
         }
-
-        return null;
+        return new ArrayList<>(); // read that this is preferable to returning null
     }
 
     public void saveDocuments(List<Document> documents) {
         try (ObjectOutputStream out = new ObjectOutputStream(new FileOutputStream(DOCUMENTS_FILENAME))) {
             out.writeObject(documents);
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             logger.log(Level.SEVERE, "Error occurred", e);
         }
+    }
+
+    private List<Document> checkIfObjectIsValid(Object obj) {
+        if (!(obj instanceof List<?>)) {
+            throw new ClassCastException("Loaded object is not a List");
+        }
+        List<?> tempList = (List<?>) obj;
+        for (Object item : tempList) {
+            if (!(item instanceof Document)) {
+                throw new ClassCastException("List contains non-Document elements");
+            }
+        }
+        return (List<Document>) tempList;
     }
 
     public void approveVersion(DocumentVersion version, String reviewerId) {

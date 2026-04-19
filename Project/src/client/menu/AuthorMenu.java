@@ -120,7 +120,7 @@ public class AuthorMenu {
                     LanternaEditor editor = new LanternaEditor(content);
 
                     try {
-                        editor.startView();
+                        editor.startView(); //start a view
                     } catch (IOException e) {
                         logger.log(Level.SEVERE, "Could not start Lanterna Editor", e);
                     }
@@ -139,7 +139,7 @@ public class AuthorMenu {
                     LanternaEditor editor = new LanternaEditor(content);
 
                     try {
-                        editor.startEdit();
+                        editor.startEdit(); //start an edit
                     } catch (IOException e) {
                         logger.log(Level.SEVERE, "Could not start Lanterna Editor", e);
                     }

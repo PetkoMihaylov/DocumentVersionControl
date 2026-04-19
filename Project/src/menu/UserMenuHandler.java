@@ -175,7 +175,7 @@ public class UserMenuHandler {
                         String content = lines[2];
                         int authorId = author.getUserId();
 
-                        documentService.createVersion(docId, content, authorId);
+                        documentService.addVersionToDocument(docId, content, authorId);
 
                         sendResponse(out, "OK", "Version created!");
                     }

@@ -60,11 +60,9 @@ public class Document implements Serializable {
         return title;
     }
 
-    public Document getDocumentById (int documentId) {
-        for (DocumentVersion version : versions) {
-            if (version.getVersionNumber() == documentId) {
-                return this;
-            }
+    public Document getDocumentById(int documentId) {
+        if (this.documentId == documentId) {
+            return this;
         }
         return null;
     }
@@ -101,7 +99,6 @@ public class Document implements Serializable {
     
 
 
-
 //        DocumentManager documentManager = new DocumentManager();
 //        DocumentService documentService = new DocumentService();
 //        documentService.addDocument(this);
@@ -118,10 +115,7 @@ public class Document implements Serializable {
     }
 
     public List<DocumentVersion> getAllVersions() {
-        if (versions.isEmpty()) {
-            return null;
-        }
-        return versions;
+        return new ArrayList<>(versions);
     }
 
     public DocumentVersion getActiveVersion() {
@@ -154,10 +148,11 @@ public class Document implements Serializable {
         if(versions.isEmpty()) {
             System.out.println("I am from getVersionContent and versions is empty!\n");
             //DocumentManager documentManager = new DocumentManager();
-            //documentManager.loadDocuments();
+            //documentManager.loadDocumentsFromFile();
         }
         return versions.get(versionNumber).getContent();
     }
+
     public DocumentVersion getVersion(int versionNumber) {
         return versions.get(versionNumber);
     }
@@ -167,9 +162,6 @@ public class Document implements Serializable {
     }
 
     public boolean versionsIsEmpty() {
-        if(versions.isEmpty()){
-            return true;
-        }
-        return false;
+        return versions.isEmpty();
     }
 }

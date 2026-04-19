@@ -15,7 +15,7 @@ public class DocumentCreator {
 
     private static final Logger logger = Logger.getLogger(DocumentCreator.class.getName());
 
-    public void createNewDocuments(String content, int userId) {
+    public void createNewDocuments(DocumentService documentService, String content, int userId) {
 
         System.out.println("Creating users...");
         UserManager userManager = new UserManager();
@@ -54,33 +54,19 @@ public class DocumentCreator {
         System.out.println("Creating docs...");
 
 
-        DocumentManager documentManager = new DocumentManager();
-        DocumentService documentService = new DocumentService();
-
-//        Document document1 = documentManager.addDocument("JavaExamples", "Java code and examples.", id3, DocumentType.TXT);
-//        document1.createNewVersion("JavaFunctions is the most important thing, this means you have to learn!", id3);
-//        Document document2 = documentManager.addDocument("JavaCourses", "Java coding and courses.", id3, DocumentType.XML);
-//        document1.createNewVersion("JavaFunctions is the most important thing, this means you have to learn! I have added this.", id4);
-//        document1.createNewVersion("JavaFunctions2", id2);
-
-
-        Document document1 = documentManager.addDocument("JavaExamples","Java code and examples.", id3, DocumentType.TXT);
+        Document document1 = documentService.createDocument("JavaExamples", "Java code and examples.", id3, DocumentType.TXT);
 
         documentService.addVersionToDocument(document1.getDocumentId(), "JavaFunctions is the most important thing, this means you have to learn!", id3);
 
-        documentService.addVersionToDocument(document1.getDocumentId(),"JavaFunctions2", id2);
+        documentService.addVersionToDocument(document1.getDocumentId(), "JavaFunctions2", id2);
 
 
-        Document document2 = documentManager.addDocument("JavaCourses", "Java coding and courses.", id3, DocumentType.XML);
+        Document document2 = documentService.createDocument("JavaCourses", "Java coding and courses.", id3, DocumentType.XML);
 
-        documentService.addVersionToDocument(document2.getDocumentId(),"JavaFunctions is the most important thing, this means you have to learn! I have added this.", id4);
-
-
+        documentService.addVersionToDocument(document2.getDocumentId(), "JavaFunctions is the most important thing, this means you have to learn! I have added this.", id4);
 
 
-
-
-        Document document3 = documentManager.addDocument("C# Courses", "c# coding and courses.", id4, DocumentType.DOCX);
+        Document document3 = documentService.createDocument("C# Courses", "c# coding and courses.", id4, DocumentType.DOCX);
         documentService.addVersionToDocument(document3.getDocumentId(), "Here you can learn about C#, step-by-step,", id4); //changed from doc2 to 3
 
         List<DocumentVersion> doc1versions = document1.getAllVersions();
