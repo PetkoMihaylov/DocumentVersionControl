@@ -1,14 +1,14 @@
 package server;
 
-import document.service.DocumentManager;
-import manager.UserManager;
+import service.DocumentManager;
+import service.UserManager;
 import menu.UserMenuHandler;
 
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.sql.SQLClientInfoException;
+import java.util.NoSuchElementException;
 import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -58,6 +58,10 @@ public class Server {
 
             } catch (IOException e) {
                 logger.log(Level.SEVERE, "Error occurred on Client thread. Disconnected probably.", e);
+            } catch (NoSuchElementException e) {
+                logger.log(Level.SEVERE, "Client connection disconnected abruptly.", e);
+            } catch (NullPointerException e) {
+                logger.log(Level.SEVERE, "Null Pointer, no client.", e);
             }
         }
     }

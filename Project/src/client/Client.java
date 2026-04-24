@@ -1,9 +1,6 @@
 package client;
 
 
-import client.ui.LanternaEditor;
-import document.service.DocumentService;
-
 import java.io.IOException;
 import java.io.PrintStream;
 import java.net.Socket;
@@ -11,7 +8,7 @@ import java.util.Scanner;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import static client.menu.UserMenu.showUserMenu;
+import static client.service.UserMenu.showUserMenu;
 
 
 public class Client {

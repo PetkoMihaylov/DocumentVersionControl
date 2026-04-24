@@ -1,0 +1,9 @@
+----- Document: JavaExamples -----
+Description: Java code and examples.
+Document ID : 2
+Version : 1
+Author ID : 4
+Created At : 2026-04-24T01:37:13.776426100
+Status: DRAFT
+----- Content -----
+JavaFunctions is the most important thing, this means you have to learn!

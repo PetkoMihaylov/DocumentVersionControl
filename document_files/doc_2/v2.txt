@@ -1,0 +1,9 @@
+----- Document: JavaExamples -----
+Description: Java code and examples.
+Document ID : 2
+Version : 2
+Author ID : 3
+Created At : 2026-04-23T18:30:33.318922300
+Status: DRAFT
+--- Content ---
+JavaFunctions2

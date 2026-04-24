@@ -1,20 +1,24 @@
 package menu;
 
+import exceptions.DocumentCreationException;
 import exceptions.UserCreationException;
-import document.model.Document;
-import document.model.DocumentType;
-import document.model.DocumentVersion;
-import document.service.DocumentService;
-import manager.UserManager;
+import model.Document;
+import model.DocumentType;
+import model.DocumentVersion;
+import service.DocumentService;
+import service.UserManager;
 import model.*;
 
 import java.io.*;
 import java.util.*;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 public class UserMenuHandler {
     private final UserManager userManager;
 
     private DocumentService documentService = new DocumentService();
+    private static final Logger logger = Logger.getLogger(UserMenuHandler.class.getName());
 
 
     public UserMenuHandler(UserManager userManager)
@@ -32,7 +36,12 @@ public class UserMenuHandler {
         while (true)
         {
             out.println("Login? Y/N");
-            String login = sc.nextLine();
+            String login = "";
+            try {
+                login = sc.nextLine();
+            }catch (NoSuchElementException e){
+                logger.log(Level.FINE, "Error in client service. Client disconnected or no command!", e);
+            }
 
             if (!login.equalsIgnoreCase("Y"))
             {
@@ -81,11 +90,213 @@ public class UserMenuHandler {
     }
 
     private void readerMenu(Scanner sc, PrintStream out, User user) {
-        out.println("Logged in as reader!");
+        out.println("Logged in as reader.");
+
+        while (true) {
+            try {
+                System.out.println("Reader waiting for request...");
+
+                String request = readRequest(sc);
+
+                if (request == null || request.isEmpty()) {
+                    System.out.println("Reader client disconnected.");
+                    break;
+                }
+
+                String[] lines = request.split("\n");
+                String command = lines[0].trim();
+
+                //System.out.println("Reader command -> " + command);
+
+                switch (command) {
+
+                    case "LIST_ACTIVE_DOCUMENTS" -> {
+
+                        List<Document> activeDocs = documentService.getDocumentsWithActiveVersion();
+
+                        if (activeDocs.isEmpty()) {
+                            sendResponse(out, "No active documents available.");
+                        }
+                        else {
+                            List<String> response = new ArrayList<>();
+                            for (Document doc : activeDocs) {
+                                DocumentVersion active = doc.getActiveVersion();
+
+                                response.add(doc.getId() + " - " + doc.getTitle() + " ( Active version: " + active.getVersionNumber() + ")");
+                            }
+                            sendResponse(out, response.toArray(new String[0]));
+                        }
+                    }
+
+                    case "VIEW_DOCUMENT" -> {
+
+                        int docId = Integer.parseInt(lines[1].trim());
+                        String content = documentService.getActiveVersionContent(docId);
+
+                        if (content == null) {
+                            sendResponse(out, "Error: Document not found or has no active version!");
+                        } else {
+                            sendResponse(out, content);
+                        }
+                    }
+
+                    /*case "EXPORT_DOCUMENT" -> {
+                        int docId = Integer.parseInt(lines[1].trim());
+                        try {
+                            Document doc = documentService.getDocumentById(docId);
+                            DocumentVersion active = doc != null ? doc.getActiveVersion() : null;
+
+                            if (doc == null || active == null) {
+
+                                sendResponse(out, "Error: Document not found or has no active vresion!");
+
+                            } else {
+                                sendResponse(out, doc.getTitle(), String.valueOf(active.getVersionNumber()), active.getContent()
+                                );
+                            }
+                        } catch (Exception e) {
+                            sendResponse(out, "Error: Could not retrieve document.");
+                        }
+                    }*/
+
+                    case "EXIT" -> {
+                        sendResponse(out, "Goodbye!");
+                        return;
+                    }
+
+                    default -> sendResponse(out, "Error: Unknown command: " + command);
+                }
+
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error in reader service", e);
+                break;
+            }
+        }
     }
 
     private void reviewerMenu(Scanner sc, PrintStream out, User user) {
-        out.println("Logged in as reviewer!");
+        out.println("Logged in as reviewer.");
+
+        while (true) {
+            try {
+                System.out.println("Reviewer waiting for request...");
+
+                String request = readRequest(sc);
+
+                if (request == null || request.isEmpty()) {
+                    System.out.println("Reviewer client disconnected.");
+                    break;
+                }
+
+                String[] lines = request.split("\n");
+                String command = lines[0].trim();
+
+                System.out.println("Reviewer command -> " + command);
+
+                switch (command) {
+
+                    case "LIST_DOCUMENTS" -> {
+                        List<Document> docs = documentService.getAllDocuments();
+
+                        if (docs.isEmpty()) {
+                            sendResponse(out, "No documents in the system.");
+                        } else {
+
+                            List<String> response = new ArrayList<>();
+
+                            for (Document doc : docs) {
+                                response.add(doc.getId() + " - " + doc.getTitle() + " (" + doc.getDocumentType() + ") ");
+                            }
+
+                            sendResponse(out, response.toArray(new String[0]));
+                        }
+                    }
+
+                    case "VIEW_VERSIONS" -> {
+                        int docId = Integer.parseInt(lines[1].trim());
+                        try {
+                            List<DocumentVersion> versions = documentService.getVersions(docId);
+
+                            if (versions == null || versions.isEmpty()) {
+                                sendResponse(out, "Document has no versions.");
+                            } else {
+
+                                List<String> response = new ArrayList<>();
+
+                                for (DocumentVersion v : versions) {
+                                    response.add("Version; " + v.getVersionNumber() + " | Author: " + v.getAuthorId() + " | Created: " + v.getCreatedAt() + " | Status: " + v.getStatus());
+                                }
+
+                                sendResponse(out, response.toArray(new String[0]));
+                            }
+                        } catch (NullPointerException e) {
+                            sendResponse(out, "Error: Document does not exist!");
+                        }
+                    }
+
+                    case "VIEW_VERSION_CONTENT" -> {
+                        int docId = Integer.parseInt(lines[1].trim());
+                        int versionNumber = Integer.parseInt(lines[2].trim());
+
+                        String content = documentService.getDraftContent(docId, versionNumber);
+
+                        if (content == null) {
+                            sendResponse(out, "Error: Document or version does not exist.");
+                        } else {
+                            sendResponse(out, content);
+                        }
+                    }
+
+                    case "APPROVE_VERSION" -> {
+
+                        int docId = Integer.parseInt(lines[1].trim());
+                        int versionNumber = Integer.parseInt(lines[2].trim());
+
+                        String result = documentService.approveVersion(docId, versionNumber);
+                        sendResponse(out, result);
+                    }
+
+                    case "REJECT_VERSION" -> {
+                        int docId = Integer.parseInt(lines[1].trim());
+                        int versionNumber = Integer.parseInt(lines[2].trim());
+
+                        String result = documentService.rejectVersion(docId, versionNumber);
+                        sendResponse(out, result);
+                    }
+
+                    case "ADD_COMMENT" -> {
+
+                        int docId = Integer.parseInt(lines[1].trim());
+                        int versionNumber = Integer.parseInt(lines[2].trim());
+                        String comment = lines.length > 3 ? lines[3].trim() : ""; //if comment, get, if not, leave empty
+                        int reviewerId = user.getUserId();
+
+                        String result = documentService.addCommentToVersion(docId, versionNumber, reviewerId, comment);
+                        sendResponse(out, result);
+                    }
+
+                    case "ACTIVATE_VERSION" -> {
+
+                        int docId = Integer.parseInt(lines[1].trim());
+                        int versionNumber = Integer.parseInt(lines[2].trim());
+
+                        String result = documentService.activateVersion(docId, versionNumber);
+                        sendResponse(out, result);
+                    }
+
+                    case "EXIT" -> {
+                        sendResponse(out, "Goodbye!");
+                        return;
+                    }
+
+                    default -> sendResponse(out, "Error: Unknown command: " + command);
+                }
+
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error in reviewer service", e);
+                break;
+            }
+        }
     }
 
 
@@ -96,31 +307,109 @@ public class UserMenuHandler {
     private void adminMenu(Scanner sc, PrintStream out, User admin)
     {
         out.println("Logged in as admin.");
-        out.println("Choose what action you want to take: " + Arrays.toString(userManager.getAdminActions().toArray()));
 
-
-
-        if(sc.nextLine().equalsIgnoreCase("CREATE_USER")) {
-            out.println("Enter user type to create: " + Arrays.toString(Role.values()) + ";");
+        System.out.println("\nEntered as admin!\n");
+        while (true) {
             try {
-                Role role = Role.valueOf(sc.nextLine().toUpperCase());
+                System.out.println("Admin waiting for request...");
 
-                out.println("Enter username:");
-                String userName = sc.nextLine();
+                String request = readRequest(sc);
 
-                out.println("Enter password:");
-                String password = sc.nextLine();
+                if (request == null || request.isEmpty()) {
+                    System.out.println("Admin client disconnected.");
+                    break;
+                }
 
-                userManager.registerUser(userName, password, role);
+                String[] lines = request.split("\n");
+                String command = lines[0].trim();
 
-                out.println("Success.");
-            } catch (IllegalArgumentException e) {
-                out.println("Error: Invalid user type.");
-            } catch (UserCreationException e) {
-                throw new RuntimeException(e);
+                System.out.println("Admin command -> " + command);
+
+                switch (command) {
+
+                    case "CREATE_USER" -> {
+                        try {
+
+                            Role role = Role.valueOf(lines[1].trim().toUpperCase()); //lines[1-3] role, username, password
+                            String userName = lines[2].trim();
+                            String password = lines[3].trim();
+
+                            userManager.registerUser(userName, password, role);
+
+                            sendResponse(out, "User '" + userName + "' created with role " + role + ".");
+
+                        } catch (IllegalArgumentException e) {
+                            sendResponse(out, "Error! Invalid role. Available roles: " + Arrays.toString(Role.values()));
+                        } catch (UserCreationException e) {
+                            sendResponse(out, "Error: " + e.getMessage());
+                        }
+                    }
+
+                    case "LIST_USERS" -> {
+                        List<User> users = userManager.getAllUsers();
+                        if (users.isEmpty()) {
+                            sendResponse(out, "No users registered.");
+                        } else {
+                            List<String> response = new ArrayList<>();
+                            for (User user : users) {
+                                response.add("ID: " + user.getUserId() + " | Username: " + user.getUserName() + " | Role: " + user.getUserRole());
+                            }
+                            sendResponse(out, response.toArray(new String[0]));
+                        }
+                    }
+
+
+                    case "CHANGE_ROLE" -> {//Changes the role of the user with the given ID to the provided one.
+                        try {
+
+                            int userId =  Integer.parseInt(lines[1].trim());
+                            Role newRole = Role.valueOf(lines[2].trim().toUpperCase());
+
+                            String result = userManager.changeUserRole(userId, newRole);
+                            sendResponse(out, result);
+
+                        } catch (NumberFormatException e) {
+                            sendResponse(out, "Error: User ID must be an integer.");
+                        } catch (IllegalArgumentException e) {
+                            sendResponse(out, "Error: Invalid role. Available roles: " + Arrays.toString(Role.values()));
+                        }
+                    }
+
+                    case "LIST_DOCUMENTS" -> { //Lists all documents
+
+                        List<Document> docs = documentService.getAllDocuments();
+
+                        if (docs.isEmpty()) {
+                            sendResponse(out, "No documents in the system.");
+                        } else {
+
+                            List<String> response = new ArrayList<>();
+
+                            for (Document doc : docs) {
+
+                                String active = doc.getActiveVersion() != null ? "Active v" + doc.getActiveVersion().getVersionNumber() : "No active version";
+                                response.add("ID: " + doc.getId() + " | " + doc.getTitle() + " | Type: " + doc.getDocumentType() + " | " + active + " | Versions: " + doc.getAllVersions().size());
+
+                            }
+                            sendResponse(out, response.toArray(new String[0]));
+                        }
+                    }
+
+                    case "EXIT" -> {
+                        sendResponse(out, "Goodbye!");
+                        return;
+                    }
+
+                    default -> sendResponse(out, "Error: Unknown command! " + command);
+                }
+
+            } catch (Exception e) {
+                logger.log(Level.SEVERE, "Error in admin service!", e);
+                break;
             }
         }
     }
+
 
 
     private void authorMenu(Scanner sc, PrintStream out, User author) {
@@ -155,24 +444,30 @@ public class UserMenuHandler {
                 }
 
                 String[] lines = request.split("\n");
-                String command = lines[0];
+                String command = lines[0].trim();
 
                 System.out.println("\nThe command is -> " + command + "\n");
 
                 switch (command) {
 
-                    case "CREATE_DOCUMENT" -> {
-                        String title = lines[1];
-                        String description = lines[2];
-                        String documentType = lines[3];
+                    case "CREATE_DOCUMENT" -> { //#1
+                        String title = lines[1].trim();
+                        String description = lines[2].trim();
+                        String documentType = lines[3].trim();
                         int authorId = author.getUserId();
-                        documentService.createDocument(title, description, authorId, DocumentType.valueOf(documentType));
-                        sendResponse(out, "OK", "Document created!");
+                        try {
+
+                            documentService.createDocument(title, description, authorId, DocumentType.valueOf(documentType));
+                            sendResponse(out, "Document created!");
+                        } catch (DocumentCreationException e ){
+                            String content = "Cannot create document! Invalid data!";
+                            sendResponse(out, content);
+                        }
                     }
 
-                    case "CREATE_VERSION" -> {
-                        int docId = Integer.parseInt(lines[1]);
-                        String content = lines[2];
+                    case "CREATE_VERSION" -> { //#2
+                        int docId =  Integer.parseInt(lines[1].trim());
+                        String content = lines[2].trim();
                         int authorId = author.getUserId();
 
                         documentService.addVersionToDocument(docId, content, authorId);
@@ -180,7 +475,7 @@ public class UserMenuHandler {
                         sendResponse(out, "OK", "Version created!");
                     }
 
-                    case "LIST_DOCUMENTS" -> {
+                    case "LIST_DOCUMENTS" -> { //#3
                         List<Document> docs = documentService.getAllDocuments();
 
                         List<String> response = new ArrayList<>();
@@ -192,57 +487,178 @@ public class UserMenuHandler {
                     }
 
 
-                    case "VIEW_VERSIONS" -> {
-                        int docId = Integer.parseInt(lines[1]);
+                    case "VIEW_VERSIONS" -> { // view the documents info only, maybe should rename to LIST_VERSIONS?
+                        int docId = Integer.parseInt(lines[1].trim());
+                        try {
+                            List<DocumentVersion> versions = documentService.getVersions(docId);
 
-                        List<DocumentVersion> versions = documentService.getVersions(docId);
+                            List<String> response = new ArrayList<>();
 
-                        List<String> response = new ArrayList<>();
+                            for (DocumentVersion v : versions) {
 
-                        for (DocumentVersion v : versions) {
-                            response.add("Version " + v.getVersionNumber() + " - " + v.getStatus());
+                                response.add("Version " + v.getVersionNumber() + " - " + v.getStatus());
+                            }
+
+                            sendResponse(out, response.toArray(new String[0]));
+                        } catch (NullPointerException e) {
+                            String content = "Document does not exist!";
+                            sendResponse(out, content);
+                        }
+                    }
+
+                    case "VIEW_DRAFT" -> { //#5
+                        int docId = Integer.parseInt(lines[1].trim());
+                        int versionNumber = Integer.parseInt(lines[2].trim());
+//                        if(lines[3] != null){
+//                            int versionNumber2 = Integer.parseInt(lines[3]);
+//                            String[] content = documentService.getDraftContentForTwoVersions(docId, versionNumber, versionNumber2);
+//                            sendResponse(out, content);
+//                        }
+//                        else{
+//                            String content = documentService.getDraftContent(docId, versionNumber);
+//                            sendResponse(out, content);
+//                        }
+                        try {
+                            String content = documentService.getDraftContent(docId, versionNumber);
+                            if (content == null){
+                                content = "Document/Version does not exist!";
+                            }
+                            sendResponse(out, content);
+                        } catch (NullPointerException e) {
+                            String content = "Document does not exist!2";
+                            sendResponse(out, content);
                         }
 
-                        sendResponse(out, response.toArray(new String[0]));
+                    }
+                    case "EDIT_DRAFT" -> { //#6
+
+                        int docId = Integer.parseInt(lines[1].trim());
+                        int versionNumber = Integer.parseInt(lines[2].trim());
+                        String newContent = lines[3].trim();
+                        int authorId = author.getUserId();
+
+                        try{
+
+                            String content = documentService.editDraftDocument(docId, versionNumber, newContent, authorId);
+                            sendResponse(out, content);
+
+                        } catch (NullPointerException e) {
+                            String content = "Document does not exist!2";
+                            sendResponse(out, content);
+                        }
+                    }
+                    case "COMPARE_VERSIONS" -> { //#7
+                        int docId = Integer.parseInt(lines[1].trim());
+                        int versionNumber = Integer.parseInt(lines[2].trim());
+                        int versionNumber2 = Integer.parseInt(lines[3].trim());
+                        String[] contentArr = null;
+
+                        try {
+
+                            contentArr = documentService.getDraftContentForTwoVersions(docId, versionNumber, versionNumber2);
+                            String content = null;
+
+                            if (contentArr != null) {
+                                content = contentArr[0] + "##TWO_VERSIONS###" + contentArr[1];
+                                System.out.println("This is the content -> " + content);
+                            }
+
+                            if(contentArr[1] == null)
+                            {
+                                content = "One or more of the version numbers do not exist!";
+                            }
+
+                            System.out.println(content);
+                            sendResponse(out, content);
+                        } catch (IllegalArgumentException e) {
+
+                            logger.log(Level.SEVERE, "Error: incorrect argumenst!", e);
+                            //System.out.println("Error: Invalid version number!");
+                            String content = "One or more of the version numbers do not exist!";
+                            sendResponse(out, content);
+
+                        } catch (NullPointerException e){
+
+                            logger.log(Level.SEVERE, "Error occurred while loading documents", e);
+                            String content = "One or more of the version numbers do not exist!";
+                            sendResponse(out, content);
+
+                        }
                     }
 
-                    case "VIEW_DRAFT" -> {
+
+                    case "LIST_DRAFTS" -> { //#8
+
                         int docId = Integer.parseInt(lines[1]);
-                        int versionNumber = Integer.parseInt(lines[2]);
 
-                        String content = documentService.getDraftContent(docId, versionNumber);
+                        try {
 
-                        sendResponse(out, content);
+                            List<DocumentVersion> versions = documentService.getAllDraftDocuments(docId);
+                            //System.out.println(versions);
+
+                            List<String> response = new ArrayList<>();
+
+                            for (DocumentVersion version : versions) {
+                                response.add(version.getContent() + " - " + version.getStatus());
+                            }
+                            sendResponse(out, response.toArray(new String[0]));
+
+                        } catch (NullPointerException e) {
+                            String content = "Document has no versions!";
+                            sendResponse(out, content);
+                        }
+
                     }
-                    case "EDIT_DRAFT" -> {
+
+                    case "VIEW_DOCUMENT_HISTORY" -> { //#9
                         int docId = Integer.parseInt(lines[1]);
-                        int versionNumber = Integer.parseInt(lines[2]);
-                        String newContent = lines[3];
-                        //documentService.editDraftDocument(docId, versionNumber, newContent);
-                        sendResponse(out, "The draft is edited! A new version was created successfully!"); //add some other logic
+                        try {
+
+                            ArrayList<DocumentVersion> versions = documentService.getVersions(docId);
+
+                            if (versions == null || versions.isEmpty()) {
+                                sendResponse(out, "No history found for this document.");
+                            } else {
+
+                                List<String> response = new ArrayList<>();
+
+                                for (int i = 0; i < versions.size(); i++) {
+                                    DocumentVersion version = versions.get(i);
+                                    response.add("Version " + version.getVersionNumber() + " | Author ID: " + version.getAuthorId() + " | Created: " + version.getCreatedAt().toString() + " | Status: " + version.getStatus());
+                                }
+                                sendResponse(out, response.toArray(new String[0]));
+                            }
+                        } catch (NullPointerException e) {
+                            sendResponse(out, "Document does not exist!");
+                        }
                     }
 
-                    case "LIST_DRAFTS" -> {
-                        int docId = Integer.parseInt(lines[1]);
-                        int versionNumber = Integer.parseInt(lines[2]);
-                        //String content = documentService.getAllDrafts();
-                        //sendResponse(out, content); //add some other logic
-                    }
-
-                    case "VIEW_DOCUMENT_HISTORY" -> {
-                        int docId = Integer.parseInt(lines[1]);
-                        //has to return all document info
-                    }
                     case "REQUEST_DOCUMENT_TYPES" -> {
                         List<String> documentTypes = documentService.getDocumentTypes();
                         sendResponse(out, documentTypes.toArray(new String[0]));
                     }
 
+                    case "SAVE_VERSION" -> {
+
+                        int docId = Integer.parseInt(lines[1].trim());
+                        int versionNumber = Integer.parseInt(lines[2].trim());
+                        String newContent = lines[3].trim();
+                        int authorId = author.getUserId();
+
+                        try {
+
+                            String result = documentService.editDraftDocument(docId, versionNumber, newContent, authorId);
+                            sendResponse(out, "Version saved!", result != null ? result : "");
+
+                        } catch (NullPointerException e) {
+                            sendResponse(out, "Error: Document or version does not exist.");
+                        }
+                    }
+
 
                     case "EXIT" -> {
-                        System.out.println("Client requested exit.");
-                        out.println("You requested to exit. Goodbye!");
-                        break;
+                        sendResponse(out, "Goodbye!");
+                        return;
                     }
 
                     default -> {
@@ -268,6 +684,7 @@ public class UserMenuHandler {
 
         return request.toString();
     }
+
     public static void sendResponse(PrintStream out, String... lines) {
         for (String line : lines) {
             out.println(line);

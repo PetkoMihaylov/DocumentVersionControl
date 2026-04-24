@@ -12,15 +12,109 @@ import com.googlecode.lanterna.terminal.DefaultTerminalFactory;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Consumer;
+
+
+
 
 public class LanternaEditor {
 
     private final String oldContent;
     private String newContent;
+    private Consumer<String> saveCallback;
 
-    public LanternaEditor(String oldContent) {
+    public LanternaEditor(String oldContent, Consumer<String> saveCallback) {
         this.oldContent = oldContent;
         this.newContent = oldContent;
+        this.saveCallback = saveCallback;
+    }
+
+    public int startEdit() throws IOException {
+        Screen screen = new DefaultTerminalFactory().createScreen();
+        screen.startScreen();
+
+        BasicWindow window = new BasicWindow("Document Viewer");
+        Panel mainPanel = new Panel(new GridLayout(2));
+
+
+        TextBox difference = new TextBox(new TerminalSize(3, 20));
+        mainPanel.addComponent(difference);
+
+
+        TextBox textBox = new TextBox(new TerminalSize(70, 20));
+        textBox.setReadOnly(true);
+        textBox.setText(newContent);
+        mainPanel.addComponent(textBox);
+
+
+
+        Button exitButton = new Button("Exit (CTRL+W)", () -> {
+            window.close();
+            try {
+                screen.stopScreen();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
+        });
+
+        Panel buttonPanel = new Panel();
+        buttonPanel.addComponent(exitButton);
+        showLineNumber(oldContent, difference);
+        window.addWindowListener(new WindowListenerAdapter() {
+            @Override
+            public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+
+                if (keyStroke.isCtrlDown()) {
+
+                    switch (keyStroke.getKeyType()) {
+                        case Character:
+                            char c = keyStroke.getCharacter();
+
+                            if (c == 'w' || c == 'W') {
+                                deliverEvent.set(false);
+                                window.close();
+                                try {
+                                    screen.stopScreen();
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                return;
+                            }
+                            break;
+                    }
+                }
+            }
+        });
+
+
+        MultiWindowTextGUI gui = new MultiWindowTextGUI(screen);
+
+        window.addWindowListener(new WindowListenerAdapter() {
+            @Override
+            public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+                if (keyStroke.getKeyType() == KeyType.Backspace ||  keyStroke.getKeyType() == KeyType.Enter || keyStroke.getKeyType() == KeyType.ArrowDown) {
+                    showLineNumber(oldContent, difference);
+                }
+            }
+        });
+
+
+        Panel root = new Panel();
+
+        mainPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
+        mainPanel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
+        //window.setHints(List.of(Window.Hint.EXPANDED)); //uses Array coordinates to resize Lanterna window
+        //buttonPanel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Beginning));
+
+
+        root.addComponent(mainPanel);
+        //root.addComponent(diffButtonLanterna);
+        root.addComponent(buttonPanel);
+
+        window.setComponent(root);
+
+        gui.addWindowAndWait(window);
+        return 0;
     }
 
     public int startView() throws IOException {
@@ -28,13 +122,20 @@ public class LanternaEditor {
         screen.startScreen();
 
         BasicWindow window = new BasicWindow("Document Viewer");
-        Panel mainPanel = new Panel(new GridLayout(1));
+        Panel mainPanel = new Panel(new GridLayout(2));
+
+
+        TextBox difference = new TextBox(new TerminalSize(3, 20));
+        difference.setReadOnly(true);
+        mainPanel.addComponent(difference);
 
 
         TextBox textBox = new TextBox(new TerminalSize(70, 20));
         textBox.setReadOnly(true);
         textBox.setText(oldContent);
         mainPanel.addComponent(textBox);
+
+
 
         Button exitButton = new Button("Exit (CTRL+W)", () -> {
             //showSideBySideDifference(oldContent, rightBox.getText(), leftDiff, rightDiff);
@@ -43,7 +144,7 @@ public class LanternaEditor {
 
         Panel buttonPanel = new Panel();
         buttonPanel.addComponent(exitButton);
-
+        showLineNumber(newContent, difference);
         window.addWindowListener(new WindowListenerAdapter() {
             @Override
             public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
@@ -72,6 +173,14 @@ public class LanternaEditor {
 
         MultiWindowTextGUI gui = new MultiWindowTextGUI(screen);
 
+        window.addWindowListener(new WindowListenerAdapter() {
+            @Override
+            public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+                if (keyStroke.getKeyType() == KeyType.Backspace ||  keyStroke.getKeyType() == KeyType.Enter || keyStroke.getKeyType() == KeyType.ArrowDown) {
+                    showLineNumber(oldContent, difference);
+                }
+            }
+        });
 
 
         Panel root = new Panel();
@@ -92,7 +201,161 @@ public class LanternaEditor {
         return 0;
     }
 
-    public int startEdit() throws IOException {
+    public int startCompare(String leftContent, String rightContent) throws IOException {
+        // oldContent is assigned leftContent when the constructor is initialized
+        newContent = rightContent;
+
+
+        Screen screen = new DefaultTerminalFactory().createScreen();
+        screen.startScreen();
+
+        MultiWindowTextGUI gui = new MultiWindowTextGUI(screen);
+
+        BasicWindow window = new BasicWindow("Document Editor");
+
+        Panel mainPanel = new Panel(new GridLayout(5));
+
+
+        // the left panel (Old version)
+        TextBox leftBox = new TextBox(new TerminalSize(40, 20));
+        leftBox.setReadOnly(true);
+        leftBox.setText(oldContent);
+
+        // the right panel (New version where you can edit)
+        TextBox rightBox = new TextBox(new TerminalSize(40, 20));
+        rightBox.setReadOnly(true);
+        rightBox.setText(newContent);
+        //window.setFocusedInteractable(rightBox);
+
+        //left difference
+        TextBox leftDiff = new TextBox(new TerminalSize(3, 20));
+        leftDiff.setReadOnly(true);
+        //right difference
+        TextBox rightDiff = new TextBox(new TerminalSize(3, 20));
+        rightDiff.setReadOnly(true);
+
+
+        EmptySpace emptySpace = new EmptySpace(new TerminalSize(2, 20));
+
+//        TextBox diffBox = new TextBox(new TerminalSize(1, 20));
+//        diffBox.setReadOnly(true);
+
+
+        // buttons
+
+//        Button diffButton = new Button("Show Diff (Ctrl+D)", () -> {
+//            showDiff(oldContent, rightBox.getText());
+//        });
+
+        Button diffButton = new Button("Show Diff (Ctrl+D)", () -> {
+            showSideBySideDifference(oldContent, rightBox.getText(), leftDiff, rightDiff);
+        });
+
+        Button exitButton = new Button("Exit (CTRL+W)", () -> {
+            //showSideBySideDifference(oldContent, rightBox.getText(), leftDiff, rightDiff);
+            //return;
+        });
+
+        //String differences = getDifference(oldContent, rightBox.getText());
+//        Button diffButtonLanterna = new Button("Show Difference in Lanterna (Ctrl+E)", () -> {
+//            String diff = getDifference(oldContent, rightBox.getText());
+//            diffBox.setText(diff);
+//        });
+
+        //panel
+        Panel buttonPanel = new Panel();
+        //buttonPanel.addComponent(saveButton);
+        buttonPanel.addComponent(diffButton);
+        buttonPanel.addComponent(exitButton);
+
+        mainPanel.addComponent(leftDiff);
+        mainPanel.addComponent(leftBox);
+        mainPanel.addComponent(emptySpace);
+        mainPanel.addComponent(rightDiff);
+        mainPanel.addComponent(rightBox);
+
+        StringBuilder leftDiffText = new StringBuilder();
+        StringBuilder rightDiffText = new StringBuilder();
+
+        //mainPanel.addComponent(leftBox);
+        //mainPanel.addComponent(diffBox);
+        //mainPanel.addComponent(rightBox);
+
+        Panel root = new Panel();
+
+        mainPanel.setLayoutManager(new LinearLayout(Direction.HORIZONTAL));
+        buttonPanel.setLayoutManager(new LinearLayout(Direction.VERTICAL));
+
+
+        //mainPanel.withBorder(Borders.singleLine("Editor"));
+        //buttonPanel.withBorder(Borders.singleLine("Actions"));
+
+        mainPanel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Fill));
+        window.setHints(List.of(Window.Hint.EXPANDED)); //uses Array coordinates to resize Lanterna window
+        //buttonPanel.setLayoutData(LinearLayout.createLayoutData(LinearLayout.Alignment.Beginning));
+
+        root.addComponent(mainPanel);
+        //root.addComponent(diffButtonLanterna);
+        root.addComponent(buttonPanel);
+
+        window.setComponent(root);
+
+        //window.setHints(Arrays.asList(Window.Hint.EXPANDED));
+        //window.setFixedSize(new TerminalSize(460, 100)); // don't know what it does as it says it should resize the window, but it doesn't do so.
+
+        window.addWindowListener(new WindowListenerAdapter() {
+            @Override
+            public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+                if (keyStroke.getKeyType() == KeyType.Backspace ||  keyStroke.getKeyType() == KeyType.Enter || keyStroke.getKeyType() == KeyType.ArrowDown) {
+                    showSideBySideDifference(oldContent, rightBox.getText(), leftDiff, rightDiff);
+                }
+            }
+        });
+
+        window.addWindowListener(new WindowListenerAdapter() {
+            @Override
+            public void onInput(Window basePane, KeyStroke keyStroke, AtomicBoolean deliverEvent) {
+
+                if (keyStroke.isCtrlDown()) {
+
+                    switch (keyStroke.getKeyType()) {
+                        case Character:
+                            char c = keyStroke.getCharacter();
+
+                            if (c == 'd' || c == 'D') {
+                                showSideBySideDifference(oldContent, rightBox.getText(), leftDiff, rightDiff);
+                                deliverEvent.set(false);
+                            }
+                            else if (c == 'w' || c == 'w') {
+                                deliverEvent.set(false);
+                                window.close();
+                                try {
+                                    screen.stopScreen();
+                                } catch (IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                                return;
+                            }
+                            break;
+                    }
+                }
+                return;
+            }
+        });
+
+
+
+
+
+        rightBox.takeFocus();
+        gui.addWindowAndWait(window);
+
+
+        return 0;
+    }
+
+
+    public int startEditWithCompare() throws IOException {
 
         Screen screen = new DefaultTerminalFactory().createScreen();
         screen.startScreen();
@@ -217,9 +480,10 @@ public class LanternaEditor {
                             if (c == 's' || c == 'S') {
                                 newContent = rightBox.getText();
                                 System.out.println("Saving...");
-                                deliverEvent.set(false); // this ignores input when using shortcut
-                                //sendCommand("SAVE_VERSION", newContent);
-
+                                deliverEvent.set(false);
+                                if (saveCallback != null) {
+                                    saveCallback.accept(newContent);
+                                }
                             }
                             else if (c == 'd' || c == 'D') {
                                 showSideBySideDifference(oldContent, rightBox.getText(), leftDiff, rightDiff);
@@ -323,30 +587,30 @@ public class LanternaEditor {
         StringBuilder leftDiffText = new StringBuilder();
         StringBuilder rightDiffText = new StringBuilder();
 
-        for (int i = 0; i < max; i++) {
+        for (int i = 1; i <= max; i++) {
 
             String oldLine = i < oldLines.length ? oldLines[i] : null;
             String newLine = i < newLines.length ? newLines[i] : null;
-
+            // fixed below to have the line number
             if (oldLine == null) {
                 // line added in new the new version
-                leftDiffText.append(" ").append("\n");
-                rightDiffText.append("+").append("\n");
+                leftDiffText.append(i).append(" ").append("\n");
+                rightDiffText.append(i).append("+").append("\n");
 
             } else if (newLine == null) {
                 // line removed from the old version
-                leftDiffText.append("-").append("\n");
-                rightDiffText.append(" ").append("\n");
+                leftDiffText.append(i).append("-").append("\n");
+                rightDiffText.append(i).append(" ").append("\n");
 
             } else if (!oldLine.equals(newLine)) {
                 // edited
-                leftDiffText.append("~").append("\n");
-                rightDiffText.append("~").append("\n");
+                leftDiffText.append(i).append("~").append("\n");
+                rightDiffText.append(i).append("~").append("\n");
 
             } else {
                 // no edit
-                leftDiffText.append(" ").append("\n");
-                rightDiffText.append(" ").append("\n");
+                leftDiffText.append(i).append(" ").append("\n");
+                rightDiffText.append(i).append(" ").append("\n");
             }
         }
 
@@ -354,4 +618,19 @@ public class LanternaEditor {
         rightDiff.setText(rightDiffText.toString());
     }
 
+    private void showLineNumber(String textContent, TextBox lineNumberContent) {
+        String[] content = textContent.split("\n");
+        //String[] lineNumber = lineNumberContent.split("\n");
+
+        int max = content.length;
+
+        //StringBuilder text = new StringBuilder();
+        StringBuilder lineNumberValue = new StringBuilder();
+
+        for (int i = 1; i <= max; i++) {
+            lineNumberValue.append(i);
+        }
+
+        lineNumberContent.setText(lineNumberValue.toString());
+    }
 }

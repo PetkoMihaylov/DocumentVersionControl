@@ -23,9 +23,16 @@ public class User implements Serializable
         setRole(role);
     }
 
+
+
     private void setRole(Role role) {
         this.role = role;
     }
+
+    public void changeRole(Role newRole) {
+        this.role = newRole;
+    }
+
     public Role getUserRole() {
         return role;
     }
